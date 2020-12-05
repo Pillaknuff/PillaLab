@@ -36,6 +36,8 @@ class Loggingmachine:
         self.pressures.resize(shape)
         self.pressures[shape[0]-1] = pressures
 
+        self.hf.flush()
+
 import os.path
 from os import path
 class UniversalLoggingTool:
@@ -108,6 +110,8 @@ class UniversalLoggingTool:
             shape = tuple(shape)
             dataset.resize(shape)
             dataset[shape[0]-1] = data
+
+            self.hf.flush()
         
         def stoplog(self):
             self.hf.close()

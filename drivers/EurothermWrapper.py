@@ -129,7 +129,7 @@ class EurothermWrapper:
                 pid = controller.pid2
             error = False
         except Exception as e:
-            print("error while Autoadjusting PID's")
+            print("error while Autoadjusting PID's" + str(e))
             pid = (float('nan'),float('nan'),float('nan'))
             error = True
         return pid,error
