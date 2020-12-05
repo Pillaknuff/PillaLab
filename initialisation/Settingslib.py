@@ -1,4 +1,4 @@
-def getDefaultSettings(self):
+def getDefaultSettings():
         import serial
         # nested dictionary
         settings = {}
@@ -105,37 +105,42 @@ def getDefaultSettings(self):
         settings["network.commandtype"] = ["mot","mot","mot","mot","nothing","nothing"] # device type adressed by the individual channels in motor command
         settings["network.channels"] = [0,1,2,3,0,0]                                # channels/motors of the individual positions in SES request, may be motor, ion gauge, ...
 
-        settings["comtool.polltime"] = 1                                            # polling time for position requests in the comissioning tool
-        settings["comtool.steppernames"] = ['x','y','z','u','v','w','s1','s2','s3','s4','s5','s6']
-        settings["comtool.PyTangoReadNames"] = ['I_sample','I_beam']            # defines what is being read from the PyTango driver, definition of connection done in the PyTango section, names should also be defined there!
-        settings["comtool.trajectoryvecs"] = [[0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,1,1,1,-1,-1,-1],[0,3,0,0,990,0,1,1,1,0,0,0]]       # should be as many as trajectories in GUI defined, will do relative moves on all 6 axis
+        # beamline specific settings, mostly not needed and can be ignored!
+        # settings["comtool.polltime"] = 1                                            # polling time for position requests in the comissioning tool
+        # settings["comtool.steppernames"] = ['x','y','z','u','v','w','s1','s2','s3','s4','s5','s6']
+        # settings["comtool.PyTangoReadNames"] = ['I_sample','I_beam']            # defines what is being read from the PyTango driver, definition of connection done in the PyTango section, names should also be defined there!
+        # settings["comtool.trajectoryvecs"] = [[0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,1,1,1,-1,-1,-1],[0,3,0,0,990,0,1,1,1,0,0,0]]       # should be as many as trajectories in GUI defined, will do relative moves on all 6 axis
         
         settings["PyTango.initialize"] = False
-        settings["PyTango.deviceadresses"] = ['hassppa3control:1000/asphere/test/keithley6517a','hassppa3control:1000/asphere/test/keithley6517a']        # List of Tango adresses for devices
-        settings["PyTango.devicetypes"] = ['Keithley_standard','Keithley_standard']                                         # Type of device, used to determine, which variable to read, check driver for what is implemented
-        settings["PyTango.devicename"] = ['I_sample','I_beam']
-        settings["PyTango.dummymode"] = True
+        # settings["PyTango.deviceadresses"] = ['hassppa3control:1000/asphere/test/keithley6517a','hassppa3control:1000/asphere/test/keithley6517a']        # List of Tango adresses for devices
+        # settings["PyTango.devicetypes"] = ['Keithley_standard','Keithley_standard']                                         # Type of device, used to determine, which variable to read, check driver for what is implemented
+        # settings["PyTango.devicename"] = ['I_sample','I_beam']
+        # settings["PyTango.dummymode"] = True
 
+        # ******************************************************settings section for growth control*********************************************
         settings["growthcontrol.Controlerallocation"] = [[0,0],[0],[0]]             # Allocation of the different Controllers to the respective fields (GUI definition)
         settings["growthcontrol.Fieldnames"] = ["Quad-12","Tm","Te"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,0,1]                       # Allocate the shutters to the respective fields
 
-        # backend definitions -> binding of Controllers
+        # backend definitions -> binding of pid controlers
         settings["growthcontrol.comPIDs"] = True
-        settings["growthcontrol.Controlernicknames"] = ["mydummy","substrate"]                  # refering name of the Eurotherms, has to be unique!
+        settings["growthcontrol.Controlernicknames"] = ["mydummy","substrate"]      # refering name of the Eurotherms, has to be unique!
         settings["growthcontrol.standardramprates"] = [10,10]                       #
         settings["growthcontrol.bepposition"] = ["Bi2Te3"]                          # for each Cell gives the setting of the shutter, which should be used for bep reading
-        settings["growthcontrol.com"] = ['com23','com23']                                   # com adresses of the individual eurotherms
-        settings["growthcontrol.slaveadress"] = [1,1]                                 # slaveadresses, standard is 1
-        settings["growthcontrol.baud"] = [9600,9600]                                     # baud rate for eurotherms, standard is 9600
-        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408']                          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
+        settings["growthcontrol.com"] = ['com23','com23']                           # com adresses of the individual eurotherms
+        settings["growthcontrol.slaveadress"] = [1,1]                               # slaveadresses, standard is 1
+        settings["growthcontrol.baud"] = [9600,9600]                                # baud rate for eurotherms, standard is 9600
+        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408']          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
+        settings["growthcontrol.useexternalPIDvals"] = [False,False]                   # if set to True, uses own PID settings and pushes them to device
+        settings["growthcontrol.PIDswitchingpoints"] = [[200,400,800],[200,400,800]]                            # Temperature points for each controler, for which the PID range will be changed (see values below)
+        settings["growthcontrol.externalPIDs"] = [[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)]]          # Software controled PID sets in  controler -> [(PID up to T1),(PID up to T2),...]
 
-        settings["growthcontrol.PressureChannels"] = ["MBE","MBE"]                  # Used to collect pressures for chamber and monitor
+        settings["growthcontrol.PressureChannels"] = ["MBE","MBE"]                                              # Used to collect pressures for chamber and monitor
 
-        settings["growthcontrol.Shutterstates"] = [["open","closed","openright","Bi2Te3","MnTe"],["open","closed"]]              # open and closed should always be refered to as open and closed! rest is optiona!
+        settings["growthcontrol.Shutterstates"] = [["open","closed","openright","Bi2Te3","MnTe"],["open","closed"]] # open and closed should always be refered to as open and closed! rest is optiona!
         settings["growthcontrol.ShutterstateAngles"] = [[90,0,-90,-30,30],[130,0]]
-        settings["growthcontrol.GUIpolltime"] = 1                                   # GUI refresh every t seconds
-        settings["growthcontrol.shutternames"] = ["s5","s6"]
+        settings["growthcontrol.GUIpolltime"] = 1                                                                # GUI refresh every t seconds
+        settings["growthcontrol.shutternames"] = ["s5","s6"]                                                     # names of the shutter assignet to the induvidual cells
         
 
         return settings
