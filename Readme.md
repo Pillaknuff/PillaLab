@@ -11,8 +11,9 @@ privat: Pt.kag@gmx.de
 
 
 v 3   ***********************
-Pillalab is now uploaded to GitHub (private repos), minor changes will not result in incremented versions any more
+Pillalab is now uploaded to GitHub (private repo), minor changes will not result in incremented versions any more
 Auto-PID functions implemented
+Pring To Log implemented
 
 v 2.1 ***********************
 Pillalab proudly presents: the motion module

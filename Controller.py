@@ -14,6 +14,7 @@ import win32file    # check for new files
 import win32event   # ...
 import os           # paths, files, similar
 import pickle       # export/import python internal data
+from datetime import datetime # used writing dates and time in a nice rendered string fashion
 
 
 sys.path.insert(0, "./GUI") # Quick hack to avoid incompatibilities with Page standard output for GUI's, not Gui.package and package both work!
@@ -64,19 +65,27 @@ class controllBackend:
         self.positions = []
         self.moving = [False]
 
+        self.physicalStateDict = {} # Dictionary for listing various physical states of the system, once they are set the first time, no global initialisation
         self.ImportObjectDict= {}
         self.runningThreadDict = {}
 
         # ******** ini flags *************************************************************************************
-        self.Flawless = False       #Flag for supressing errors in normal operation set to True
+        self.Flawless = False       # Flag for supressing errors in normal operation set to True
+        self.PrintToLog = True      # Flag for redirecting the entire print into a Log File
         self.guitestmode = False    # Flag for bypassing external drivers and using "fake number mode"
-        self.mappingstatus = 'not'
+
         #do not edit***************
-        self.PressureWindowExists = False 
-        self.remoteAllowed = False
-        self.LogGrowth = False
+        self.PressureWindowExists = False   # Internal Flag for the pressure to be communicated
+        self.remoteAllowed = False          # Internal Flag for the remote button
+        self.LogGrowth = False              # Internal Flag checking, if Growth Log is active
+        self.mappingstatus = 'not'          # Internal Flag marking, if mapping is running
         #***************************
 
+        #*********** redirect Logging to file *************
+        if self.PrintToLog:
+            date = datetime.today().strftime('%Y_%m_%d')
+            filenm = self.settings["logging.folder"] + date + "_errorlog.txt"
+            sys.stdout=open(filenm,"a")
 
         # ******* initialize packages *************************************************************************
         if self.settings["logging.log"]:
@@ -181,7 +190,7 @@ class controllBackend:
         #self.pollPosUntilStable()
 
     def singleAxisMoveAbsolute(self,whereto,whichaxis):
-        print("hey, i wanna move absolute" + str(whereto) + " on the " + str(whichaxis) + " axis!")
+        #print("hey, i wanna move absolute" + str(whereto) + " on the " + str(whichaxis) + " axis!")
         try: #catch num error
             whereto = float(whereto)
         except:
@@ -199,7 +208,10 @@ class controllBackend:
         #self.pollPosUntilStable()
     
     def allAxisMoveAbsolute(self,whereto):
-        error = self.StepperCon.go_abs_all(whereto)
+        try:
+            error = self.StepperCon.go_abs_all(whereto)
+        except Exception as e:
+            print("error in AllAxisMoveAbsolute: " + str(e))
         #self.pollPosUntilStable()
 
     def allAxisMoveRelative(self,whereto):
@@ -207,15 +219,18 @@ class controllBackend:
         #self.pollPosUntilStable()
     
     def stop_motors(self):
-        print("stopping")
-        self.StepperCon.stop_all()
+        #print("stopping")
+        try:
+            self.StepperCon.stop_all()
+        except Exception as e:
+            print("error in stop motors: " + str(e))
     
     def pollPos(self):
-        self.steppererror,self.positions,self.moving = self.StepperCon.get_pos_all()
-        #print(self.steppererror)
-        #print(self.positions)
-        #if not self.steppererror:
-        PositionControl_support.positionUpdate(self.positions)
+        try:
+            self.steppererror,self.positions,self.moving = self.StepperCon.get_pos_all()
+            PositionControl_support.positionUpdate(self.positions)
+        except Exception as e:
+            print("error in pollPos: " + str(e))
 
     def continuous_PositionPoll(self):
         while self.Poswindowactive:
@@ -233,22 +248,6 @@ class controllBackend:
         else:
             return True
         
-
-    # def pollPosUntilStable(self):
-    #     print("polling pos until stable")
-    #     self.pollPos()
-    #     moving = False
-    #     for mov in self.moving:
-    #         if mov:
-    #             moving = True
-    #             break
-    #     if moving and (not self.steppererror):
-    #         print("not stable yet, repeat")
-    #         time.sleep(self.settings["internal.posupdatetime"])
-    #         self.pollPosUntilStable()
-        
-
-
 
     #**************** internal Mapping Control **********************************************************************************************************************************
     def runMap(self,maplist,axisorder,relmap=False,folder=''):
@@ -302,8 +301,8 @@ class controllBackend:
 
     def mapstep(self):
         maplist = self.mappingdict["maplist"]
-        print("mapping " + str(self.mappingdict["mapI"]) + "/" + str(len(maplist))) #status update
-        goto = Mapping_support.orderMoveVec(maplist[self.mappingdict["mapI"]],self.mappingdict["axisorder"]) #get next position and order correspondingly
+        print("mapping " + str(self.mappingdict["mapI"]) + "/" + str(len(maplist)))                             #status update
+        goto = Mapping_support.orderMoveVec(maplist[self.mappingdict["mapI"]],self.mappingdict["axisorder"])    #get next position and order correspondingly
         if self.mappingdict["relmap"]:
             relstep = np.copy(goto)
             for i in range(len(goto)):
@@ -324,12 +323,12 @@ class controllBackend:
         #log:
         self.maplog.writeLine([filename,goto])
 
-        if self.mappingstatus == "paused": #just hang around, if paused is on
+        if self.mappingstatus == "paused":                                                                      #just hang around, if paused is on
             while self.mappingstatus == "paused":
                 time.sleep(0.5)
 
         if self.mappingstatus == "running":
-            if (not self.mappingdict["mapI"] >= (len(maplist) -1)) and success: #next one
+            if (not self.mappingdict["mapI"] >= (len(maplist) -1)) and success:                                 #next one
                 self.mappingdict["mapI"] = self.mappingdict["mapI"] + 1
                 self.mapstep()
             else:
@@ -338,16 +337,16 @@ class controllBackend:
             self.terminatemap()
         
     
-    # function catching the SES program and 
+                                                                                                                # function catching the SES program and pulling it to front, sending shortcut
     def aquireSpectrum(self,folder,program="SES",shortcut=['g']):
-        #catch program to front
+                                                                                                                # catch program to front
         success = self.pullWindowToFront(program)
         if not success:
             print("Process " + program + " not found! aborting map")
             return False,""
         self.change_handle = win32file.FindFirstChangeNotification (folder,0,win32con.FILE_NOTIFY_CHANGE_FILE_NAME)
         
-        #send shortcut
+                                                                                                                #send shortcut
         time.sleep(self.settings["mapping.sesPulltime"])
         for let in shortcut:
             self.CtrlPlusLetter(let)
@@ -379,22 +378,21 @@ class controllBackend:
 
     # ******* remote control via network ****************************************************************************************************************************************
     def InitializeRemoteControl(self):
-        self.remoteAllowed = True # set flag
+        self.remoteAllowed = True                                                                               # set flag
         import drivers.networkInterface as networkInterface
         try:
-            self.SESnetworkInterface = networkInterface.networkInterface(self.settings) # open connection
-            self.mylistener = threading.Thread(target=self.runlistener) # start listener in separate thread to avoid delay
-            self.mylistener.start() # start listener Thread, will terminate if flage is false
+            self.SESnetworkInterface = networkInterface.networkInterface(self.settings)                         # open connection
+            self.mylistener = threading.Thread(target=self.runlistener)                                         # start listener in separate thread to avoid delay
+            self.mylistener.start()                                                                             # start listener Thread, will terminate if flage is false
             success = True
         except Exception as e:
             success = False
-            print("opening network interface failed with error: ")
-            print(e)
+            print("opening network interface failed with error: " + str(e))
             self.remoteAllowed = False
 
         return success
     
-    def StopRemoteControl(self): #external call, close connection, stop listener
+    def StopRemoteControl(self):                                                                                # external call, close connection, stop listener
         self.remoteAllowed = False
         try:
             self.SESnetworkInterface.closeconnection()
@@ -406,7 +404,7 @@ class controllBackend:
             print(e)
         return success
 
-    def runlistener(self): #infinity loop listening on external interface for commands
+    def runlistener(self):                                                                                      # infinity loop listening on external interface for commands
         if self.remoteAllowed:
             success = self.SESnetworkInterface.listen()
             if success:
@@ -420,21 +418,21 @@ class controllBackend:
         else:
             print("not gonna listen to network, not allowed!")
     
-    def ProcessNetworkCommand(self,command): #process external command
+    def ProcessNetworkCommand(self,command):                                                                    # process external command
         action = command[0:3]
         whichval = command[4:7]
         
-        if action == 'set': # commands, where something should be done, either move or stop
+        if action == 'set':                                                                                     # commands, where something should be done, either move or stop
             if whichval == 'pos':
                 values = command[7:]
                 values = np.fromstring(values,dtype=float,sep=';')
-                values = self.NetworkCommandToPositionRequest(values)[0] # convert to usable position array
+                values = self.NetworkCommandToPositionRequest(values)[0]                                        # convert to usable position array
                 self.allAxisMoveAbsolute(values)
                 self.AnswerToNetwork('done')
             elif whichval == 'stp':
                 self.stop_motors()
                 self.AnswerToNetwork('done')
-        elif action == 'get': # commands, where an info is to be returned, either position or stablility
+        elif action == 'get':                                                                                   # commands, where an info is to be returned, either position or stablility
             if whichval == 'pos':
                 stvec = self.states
                 outstr = self.CreateNetworkPositionString()
@@ -451,11 +449,11 @@ class controllBackend:
         
     def NetworkCommandToPositionRequest(self,array): # 
         movevec = np.zeros(len(self.settings["steppers.names"]))
-        others  = [] #reserved for more stuff later, prevent errors
-        for i in range(len(array)): # should always be 6 or less
+        others  = []                                                                                            # reserved for more stuff later, prevent errors
+        for i in range(len(array)):                                                                             # should always be 6 or less
             commandtype = self.settings["network.commandtype"][i]
             channel = self.settings["network.channels"][i]
-            if commandtype == 'mot': #possibilities: mot, nothing, pressure, temperature, ...,this is only a internal referer
+            if commandtype == 'mot':                                                                            # possibilities: mot, nothing, pressure, temperature, ...,this is only a internal referer
                 try:
                     index = self.settings["steppers.names"].index(channel)
                     movevec[index] = float(array[i])
@@ -464,10 +462,10 @@ class controllBackend:
                     print(e)
         return movevec, others
     
-    def CreateNetworkPositionString(self): #network should always to configured to ask for positions first!!!
+    def CreateNetworkPositionString(self):                                                                      # network should always to configured to ask for positions first!!!
         self.pollPos()
-        posarray = np.zeros(6) # array in SES ordering
-        for i in range(len(self.positions)): #fill string in right order
+        posarray = np.zeros(6)                                                                                  # array in SES ordering
+        for i in range(len(self.positions)):                                                                    # fill string in right order
             motname = self.settings["steppers.names"][i]
             try: 
                 index = self.settings["network.channels"].index(motname)
@@ -624,30 +622,51 @@ class controllBackend:
     #********************************* Actual growth methods *****************************************************************************
 
     # immediate response section*****************************************
-    def SetTemperature(self,controlername,setp):
+    def SetTemperature(self,controlername,setp,autotune=False):
         self.PIDCommunicator.setTemperature(controlername,setp)
         self.LogAction('Tset',controlername,setp)
+        if autotune:
+            Tunethread = threading.Thread(target=self.AutotuneGrabAndSave,args=(controlername,setp))
+            Tunethread.start()
     
-    def RampTemperature(self,controlername,setp,ramp):
+    def RampTemperature(self,controlername,setp,ramp,autotune=False):
         self.PIDCommunicator.rampTemperature(controlername,setp,ramp)
         self.LogAction('Tramp',controlername,[setp,ramp])
+        if autotune:
+            Tunethread = threading.Thread(target=self.AutotuneGrabAndSave,args=(controlername,setp))
+            Tunethread.start()
     
     def ReadTemperature(self,controlername):
         temp = self.PIDCommunicator.readTemperature(controlername)
         self.LogAction('Tread',controlername,temp)
         return temp
     
+    
     # slower response section*******************************************
+    def AutotuneGrabAndSave(self,controlername,setp):                                                                                       # followup-function on Autotune, always run in a thread!
+        try:
+            PID,error = self.PIDCommunicator.grabAutotuneOnSetpoint(controlername,setp)
+            if not error:
+                ctrlIndex = self.settings["growthcontrol.Controlernicknames"].index(controlername)
+                T_list = self.settings["growthcontrol.PIDswitchingpoints"][ctrlIndex] 
+                T_index = next(i for i, x in enumerate(T_list) if x >= setp)
+                self.settings["growthcontrol.externalPIDs"][ctrlIndex][T_index] = PID
+        except Exception as e:
+            print("Error in Controler-AutotuneGrabAndSave: " + str(e))
+            error = True
+        
+        if not error:                                                                                                                       # if this has worked -> save new parameters!
+            self.settingsout()
 
     def measureBEP(self,controlername,shutter,numreads=5):
-        openstate = self.settings["growthcontrol.bepposition"][self.settings["growthcontrol.Controlernicknames"].index(controlername)] # search out number of controler, then get the respective fitting value for the bep measuring position
+        openstate = self.settings["growthcontrol.bepposition"][self.settings["growthcontrol.Controlernicknames"].index(controlername)]      # search out number of controler, then get the respective fitting value for the bep measuring position
         basepressure = 0
         basecounter = 0
         for i in range(numreads):
             p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
             try:
                 basepressure +=  p
-                basecounter += 1                                                                          # location of the Pressure monitors name
+                basecounter += 1                                                                                                            # location of the Pressure monitors name
             except:
                 print("missread in p")
         self.SetShutterState(shutter,openstate)
@@ -677,7 +696,7 @@ class controllBackend:
         basepressure = basepressure/(basecounter)
         bep = openpressure - basepressure
 
-        print('bep measured to be ' + str(bep) )
+        #print('bep measured to be ' + str(bep) )
 
         self.LogAction('bep',controlername,bep)
         return bep
@@ -694,12 +713,15 @@ class controllBackend:
         # 0 is closed, 1 is open, rest depends on system
         print('Trying to set shutter ' + str(shutter) + ' in state '+ str(state) + 'but fail because of missing implementation...')
         self.LogAction('Shuttermove',shutter,state)
+        self.physicalStateDict[str(shutter)] = str(state)
+
         try:
             shuttername = self.settings["growthcontrol.shutternames"][shutter]
             shutterangle = self.settings["growthcontrol.ShutterstateAngles"][self.settings["growthcontrol.Shutterstates"][shutter].index(state)]
             error = False
         except Exception as e:
-            print("error defining shuttermove: " + str(e))
+            if not str(shutter) == "substrate":                                                                                               # supress error, if shutter cannot be found, elegant, as that way a substrate shutter could be easily implemented, but errors are ignored 
+                print("error defining shuttermove: " + str(e))
             error = True
         
         if not error:
@@ -730,6 +752,8 @@ class controllBackend:
                 self.GrowthLogger.logEntry('EventLog','BEP on ' + str(name) + ' measured to ' + str(value))
             elif what == 'Tset':
                 self.GrowthLogger.logEntry('EventLog','T setpoint on ' + str(name) + ' changed to ' + str(value))
+            elif what == 'TAuto':
+                self.GrowthLogger.logEntry('EventLog','T Autotune on ' + str(name) + ' activated at ' + str(value))
             elif what == 'Tramp':
                 self.GrowthLogger.logEntry('EventLog','T setpoint on ' + str(name) + ' ramping to/with ' + str(value))
             elif what == 'Tread': #log in separate channel

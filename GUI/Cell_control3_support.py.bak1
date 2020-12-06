@@ -5,6 +5,7 @@
 #  in conjunction with Tcl version 8.6
 #    Aug 22, 2020 09:25:28 PM CEST  platform: Windows NT
 #    Aug 23, 2020 12:32:52 AM CEST  platform: Windows NT
+#    Oct 19, 2020 03:40:46 PM CEST  platform: Windows NT
 
 import sys
 import threading
@@ -56,20 +57,20 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
-
-
 def startMainGUI(controlBackend): # main caller
     import Cell_control3
-    global theController, w ,top_level ,root, Tselectors, Tsettinpoints, Tramps, Shutterselectors, Cellnames, Tdisplays, BepDisplays,Eventlist
+    global theController, w ,top_level ,root, Tselectors, Tsettinpoints, Tramps, Shutterselectors, Cellnames, Tdisplays, BepDisplays,Eventlist, substratenentrynumber
+    
+    substratenentrynumber = 6 # used to refer to substrate as an special entry, by default the last one
     theController= controlBackend #tell everybody about statemashine
     top, w = Cell_control3.create_Toplevel1(theController.root)  # create initial window process
 
     # make global lists of widgets *********
-    Tselectors = [w.Tselector1,w.Tselector2,w.Tselector3,w.Tselector4,w.Tselector5,w.Tselector6]
-    Tsettinpoints = [w.Tset1,w.Tset2,w.Tset3,w.Tset4,w.Tset5,w.Tset6]
-    Tramps = [w.rset1,w.rset2,w.rset3,w.rset4,w.rset5,w.rset6]
+    Tselectors = [w.Tselector1,w.Tselector2,w.Tselector3,w.Tselector4,w.Tselector5,w.Tselector6]                                                # select cell length used to label cells, substrate is unique
+    Tsettinpoints = [w.Tset1,w.Tset2,w.Tset3,w.Tset4,w.Tset5,w.Tset6,w.Tset_S]                                                                  # setpoints inputs, also contains substrate
+    Tramps = [w.rset1,w.rset2,w.rset3,w.rset4,w.rset5,w.rset6,w.rset_S]                                                                         # ramprate inputs, also substrate
     Shutterselectors = [w.Shutterselector1,w.Shutterselector2,w.Shutterselector3,w.Shutterselector1_8,w.Shutterselector5,w.Shutterselector6]
-    Tdisplays = [w.LabelTcell1,w.LabelTcell2,w.LabelTcell3,w.LabelTcell4,w.LabelTcell5,w.LabelTcell6]
+    Tdisplays = [w.LabelTcell1,w.LabelTcell2,w.LabelTcell3,w.LabelTcell4,w.LabelTcell5,w.LabelTcell6,w.LabelT_S]
     Cellnames = [w.Headerlabel1,w.Headerlabel2,w.Headerlabel3,w.Headerlabel4,w.Headerlabel5,w.Headerlabel6]
     #BepDisplays = [w.LabelBEP,w.LabelBEP_8,w.LabelBEP_9,w.LabelBEP_10,w.LabelBEP_11,w.LabelBEP_12]
     BepDisplays = [w.BEPdisp1,w.BEPdisp2,w.BEPdisp3,w.BEPdisp4,w.BEPdisp5,w.BEPdisp6]
@@ -89,7 +90,6 @@ def startMainGUI(controlBackend): # main caller
         except Exception as e:
             print("error while filling fields in Cell Control, maybe ignorable: " + str(e))
 
-
     # stuff used for the dynamic string input functions
     Eventlist = []
     global CurrentStringInput
@@ -102,14 +102,17 @@ def startMainGUI(controlBackend): # main caller
 
     top.protocol("WM_DELETE_WINDOW", destroy_window) 
 
-
 #*************************** Periodic functions ***************************
 
 def GuiRefresher():                                                                     # continuous update of all readings of the GUI
     while celctrrunning:
-        for i in range(6):
+        for i in range(7):
             # Update Temperature readings***********************
-            channel = Tselectors[i].get()
+            if not i == substratenentrynumber:
+                channel = Tselectors[i].get()
+            else:
+                channel = "substrate"
+
             if channel in theController.settings["growthcontrol.Controlernicknames"]:
                 Tresponse = theController.ReadTemperature(channel)
                 Tresponse = "{:.2f}".format(Tresponse)
@@ -132,7 +135,11 @@ def GuiRefresher():                                                             
 
 #************************** Universal Cell Control Functions***************
 def setTemperature(controler):
-    channel = Tselectors[controler].get()
+    if not controler == substratenentrynumber:
+        channel = Tselectors[controler].get()
+    else:
+        channel = "substrate"
+
     setpoint = Tsettinpoints[controler].get()
     try:
         setpoint = float(setpoint)
@@ -146,7 +153,11 @@ def setTemperature(controler):
     
 
 def rampTemperature(controler):
-    channel = Tselectors[controler].get()
+    if not controler == substratenentrynumber:
+        channel = Tselectors[controler].get()
+    else:
+        channel = "substrate"
+
     setpoint = Tsettinpoints[controler].get()
     rampspeed = Tramps[controler].get()
     
@@ -160,7 +171,6 @@ def rampTemperature(controler):
             print("channel not supported!")
     except Exception as e:
         print("error ramping Temperature: " + str(e))
-
 
 def measureBEP(controler):
     BepThread = threading.Thread(target=performBEPmeasurementAndUpdate,args=[controler])
@@ -178,7 +188,6 @@ def performBEPmeasurementAndUpdate(controler):
         newBEP = theController.measureBEP(channel,shutter)
         strBEP = '{:0.2e}'.format(newBEP)
         BepDisplays[controler].configure(text=strBEP)
-
 
 def openShutter(field):
     print("opening shutter")
@@ -205,7 +214,6 @@ def setShutter(field):
     else:
         print("shutter not implementedon " + str(field))
 
-
 def calibShutter(field):
     print("calibrating shutter")
     outtext = "Please read shutter angle and enter into input console!"
@@ -227,6 +235,9 @@ def WaitForCalibIntput(field):
     except Exception as e:
         print("Error calibrating shutter: " + str(e))
 
+def moveSubstrateShutter(state):
+    theController.SetShutterState("substrate",state)
+    
 
 #************************** Skript section ********************************
 def selectSkriptPath():
@@ -255,9 +266,6 @@ def abortSkript():
 
 def pauseSkript():
     theController.pauseProgram(referer='growthtool')
-
-
-
 
 # ************** general functions*********************************
 def selectGraphEntries():
@@ -290,9 +298,6 @@ def startLog():
 def endLogging():
     theController.EndGrowthLog()
 
-
-
-
 # ********************** indvidually forwarded commands************
 def openS1():
     openShutter(0)
@@ -311,6 +316,9 @@ def openS5():
 
 def openS6():
     openShutter(5)
+
+def openTS():
+    moveSubstrateShutter("open")
 
 def setS1():
     setShutter(0)
@@ -348,6 +356,9 @@ def setT5():
 def setT6():
     setTemperature(5)
 
+def setTS():
+    setTemperature(substratenentrynumber)
+
 def rampS4():
     rampTemperature(3)
 
@@ -365,6 +376,9 @@ def rampT5():
 
 def rampT6():
     rampTemperature(5)
+
+def rampTS():
+    rampTemperature(substratenentrynumber)
 
 def bepT1():
     measureBEP(0)
@@ -419,6 +433,9 @@ def closeS5():
 
 def closeS6():
     closeShutter(5)
+
+def closeTS():
+    moveSubstrateShutter("closed")
 
 if __name__ == '__main__':
     import Cell_control3
