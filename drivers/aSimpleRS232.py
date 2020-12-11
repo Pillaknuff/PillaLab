@@ -139,3 +139,42 @@ class aSerial:
                     return 'nan'
         else:
             return "nan"
+
+    """
+    A short note on using the EpiMax interfaces
+    Two comm-ways are possible, Modbus (complete overkill here) and QueBUS
+    We are going to use QueBUS with a simple CheckSum
+    -> Ascii based protocol
+    -> special characters:
+        > start of new message
+        < start of response
+        ! end of message
+        ? start of data request/answer
+        # start of parameter write request
+        * Error in parameter set
+    -> allowed signs: A-Z, a-z, 0-9, .,+,-, space
+
+    A typical message (request) would look like:
+    1 Startb, 2 Adressb, 1-n param requests, 1 terminationb, 2 chksumb 
+    >           99       ?REQUESTTEXT           !               99 
+
+    response:
+    1 Startb, 2 Adressb, 1-n param answers, 1 terminationb, 2 chksumb
+    <           99       RESPONSETEXT          !               99
+
+    From the manual:
+    As an example of using the protocol, consider wanting to read the measured ion gauge and Slot pressures, change the
+    state of Trip 4 to override and read the states of all trips and digital inputs:
+    >01?Iv?Xv?Yv#TV5?ZT?ZD!
+    If check-sum (section 3.4) or CRC (section 2.3) are required, append.
+    Sample response is:
+    <01?Iv5.04E-09?Xv3.59E+00?Yv1.11E-04#TV?ZTx0100111?ZDxxxx0011!
+    followed by the check-sum or CRC if required.
+
+    Important parameter values:
+    Xv, Yv -> Extension slot 1/2 reading (=Pirani)
+    Iv, Jv -> Ion Gauge 1/2 reading
+    Ev, Fv -> Emission current of IonGauge 1/2
+    EE, FE -> Emission set value (0=OFF; 1=0.06mA; 2=0.1mA; 3=0.15mA; 4=0.25mA; 5=0.4mA; 6=0.6mA; 7=1mA; 8=1.5mA; 9=2.5mA; 10=4mA; 11=6mA; 12=10mA; 13=Degas Low; 14=Degas Medium; 15= Degas High; 16=Auto-emission.)
+    Kv     -> Thermocouple reading
+    """

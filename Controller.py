@@ -61,17 +61,19 @@ class controllBackend:
                 self.settings[key] = sett[key]
         
         # ******** ini actual data storage ***********************************************************************
-        self.temppressures = Pressurearray(self.settings)
-        self.positions = []
-        self.moving = [False]
+        self.temppressures = Pressurearray(self.settings)   # ring-storage object for temporary pressure memory(e.g. graphs)
+        self.pressures = []                                 # Array containing the last internal pressure state
+        self.pressurenames = []                             # Array containing the names of the last pressure states
+        self.positions = []                                 # Array containing the last position poll
+        self.moving = [False]                               # Array containing the stepper motor state(s)
 
-        self.physicalStateDict = {} # Dictionary for listing various physical states of the system, once they are set the first time, no global initialisation
-        self.ImportObjectDict= {}
-        self.runningThreadDict = {}
+        self.physicalStateDict = {}                         # Dictionary for listing various physical states of the system, once they are set the first time, no global initialisation
+        self.ImportObjectDict= {}                           # Dictionary for imported programs over various guis
+        self.runningThreadDict = {}                         # Dictionary for running imported threads (see above for the programs) 
 
         # ******** ini flags *************************************************************************************
         self.Flawless = False       # Flag for supressing errors in normal operation set to True
-        self.PrintToLog = True      # Flag for redirecting the entire print into a Log File
+        self.PrintToLog = False      # Flag for redirecting the entire print into a Log File
         self.guitestmode = False    # Flag for bypassing external drivers and using "fake number mode"
 
         #do not edit***************
@@ -79,6 +81,9 @@ class controllBackend:
         self.remoteAllowed = False          # Internal Flag for the remote button
         self.LogGrowth = False              # Internal Flag checking, if Growth Log is active
         self.mappingstatus = 'not'          # Internal Flag marking, if mapping is running
+
+        self.pollPressures = False          # Internal Flag used to terminate Continuous Pressure poll processes
+        self.terminate = False              # Flag used for terminating all continuously running processes
         #***************************
 
         #*********** redirect Logging to file *************
@@ -110,17 +115,23 @@ class controllBackend:
         # ******* start processes ****************************************************************************
         
         if self.settings["internal.readpressures"]:
-            self.PressureCallRepeater()
+            self.pollPressures = True
+            #self.PressureCallRepeater()
+            PressurePollThread=threading.Thread(target=self.ContinuousPressurePoll)
+            PressurePollThread.start()
+            print("Continuous pressure poll started in Controler")
 
         # ****** Start GUI *********************************************************************************
         MainControl_support.startMainGUI(self)                              # start main GUI-process, program will hang at this point, anyting later will be executed only after termination
         #******* Terminate all Processes *******************************************************************
         self.settings["internal.readpressures"] = False
-        print("finished")
+        self.pollPressures = False
+        print("Main GUI Terminated, program should terminate now")
     
 
     def __del__(self):
         self.settings["internal.readpressures"] = False
+        self.pollPressures = False
   
     
     def updateSettings(self,newdic):                # multi settings update
@@ -175,10 +186,11 @@ class controllBackend:
         print("hey, i wanna move " + str(whereto) + " on the " + str(whichaxis) + " axis!")
         try: #catch num error
             whereto = float(whereto)
-        except:
+        except Exception as e:
+            print("error in single Axis move relative: " + str(e))
             whereto = 0
 
-        if self.guitestmode: # decouple the stepper driver, only test gui functions
+        if self.guitestmode:                                                                            # decouple the stepper driver, only test gui functions
             self.positions[whichaxis] += whereto
             PositionControl_support.positionUpdate(self.positions)
         else:
@@ -191,12 +203,13 @@ class controllBackend:
 
     def singleAxisMoveAbsolute(self,whereto,whichaxis):
         #print("hey, i wanna move absolute" + str(whereto) + " on the " + str(whichaxis) + " axis!")
-        try: #catch num error
+        try:                                                                                            #catch num error
             whereto = float(whereto)
-        except:
+        except Exception as e:
+            print("Error in singleAxisMoveAbsolute: " + str(e))
             whereto = 0
 
-        if self.guitestmode: # decouple the stepper driver, only test gui functions
+        if self.guitestmode:                                                                            # decouple the stepper driver, only test gui functions
             self.positions[whichaxis] += whereto
             PositionControl_support.positionUpdate(self.positions)
         else:
@@ -205,19 +218,19 @@ class controllBackend:
             else:
                 print("nope, no motor here")
         
-        #self.pollPosUntilStable()
-    
     def allAxisMoveAbsolute(self,whereto):
         try:
             error = self.StepperCon.go_abs_all(whereto)
         except Exception as e:
             print("error in AllAxisMoveAbsolute: " + str(e))
-        #self.pollPosUntilStable()
+
 
     def allAxisMoveRelative(self,whereto):
-        error = self.StepperCon.go_rel_all(whereto)
-        #self.pollPosUntilStable()
-    
+        try:
+            error = self.StepperCon.go_rel_all(whereto)
+        except Exception as e:
+            print("Error in All Axis Move Relative: " + str(e))
+
     def stop_motors(self):
         #print("stopping")
         try:
@@ -232,7 +245,7 @@ class controllBackend:
         except Exception as e:
             print("error in pollPos: " + str(e))
 
-    def continuous_PositionPoll(self):
+    def continuous_PositionPoll(self):                                                                      # externally activated, then polling position and pushing it back to the GUI...could be done better...
         while self.Poswindowactive:
             self.pollPos()
             if not True in self.moving:
@@ -482,37 +495,40 @@ class controllBackend:
     def PressureCallRepeater(self):
         names,pressures = self.GetPressures()
 
-        # floatpressures = []
-        # for pressure in pressures:
-        #     if "E03" in pressure:
-        #         pressure = '1E-11'
-        #     try:
-        #         pressure = float(pressure)
-        #     except:
-        #         try:
-        #             pressure= pressure.rstrip()
-        #             pressure = pressure.replace('>','')
-        #             pressure = float(pressure)
-        #         except:
-        #             print("error converting " + str(pressure) + " to float")
-        #             pressure = float(0)
-        #     floatpressures.append(pressure)
-        self.temppressures.addpressure(pressures,time.time()) #write pressure into temporary array
+        self.temppressures.addpressure(pressures,time.time())                                               # write pressure into temporary array
         self.DisplayPressures(names,pressures)
         if self.settings["logging.log"]:
             self.LogPressure(pressures)
         if self.settings["internal.readpressures"]:
             threading.Timer(self.settings['pressures.readrate'],self.PressureCallRepeater).start()
+    
+    def ContinuousPressurePoll(self):                                                                       # new method for pressure polling
+        while self.pollPressures:
+            try:                                                                                            # the whole logging is done here, to provide evenly spaced data, if re-read is triggered, the triggering program should write it's own log!
+                self.pressurenames,self.pressures = self.__GetPressures()
+                self.temppressures.addpressure(self.pressures,time.time())                                  # write pressure into temporary array
+                if self.settings["logging.log"]:                                                            # if required, log the pressure to hdf5-file
+                    self.LogPressure(self.pressures)
+            except Exception as e:
+                print("Error in Continuous Pressure poll:" + str(e))
+            time.sleep(self.settings['pressures.readrate'])                                                 # wait for the polltime, then repeat...forever
 
 
-    def GetPressures(self):
+    def __GetPressures(self):                                                                               # internal function for actual communicaiton
         if self.settings["internal.readpressures"]:
-            names,pressures,errors = self.ionGaugeTalker.readall()
+            names,pressures,errors = self.ionGaugeTalker.readall()                                          # call ion gauge driver-wrapper (all ion gauges under one caller)
             return names,pressures
-        else:
+        else:                                                                                               # case for dumy testing, remove later
             return self.settings["pressures.names"], np.random.rand(len(self.settings["pressures.names"]))
     
-    def GetSinglePressure(self,name,logtag=''):
+    def GetPressures(self,triggerReRead=False):
+        if not triggerReRead:
+            return self.pressurenames,self.pressures
+        else:
+            return self.__GetPressures()
+
+
+    def __GetSinglePressure(self,name,logtag='',):                                                            # internal single pressure read
         if self.settings["internal.readpressures"]:
             pressure, error = self.ionGaugeTalker.readone(name)
         else:
@@ -523,8 +539,26 @@ class controllBackend:
             self.LogAction(logtag,name,pressure)
         
         return pressure, error
+    
+    def GetSinglePressure(self,name,logtag='',triggerReRead=False):
+        if not triggerReRead:
+            try:
+                pressure = self.pressures[self.pressurenames.index(name)]                                   # simply select pressure from List
+                error = False
+            except Exception as e:
+                error = True
+                print("Error in GetSinglePressure: " + str(e))
+            return pressure, error
+        else:                                                                                               # actually read this specific gauge
+            try:
+                pressure,error = self.__GetSinglePressure(name,logtag)
+            except Exception as e:
+                error = True
+                print ("error in GetSinglePressure Reread: " + str(e))
+        
+            return pressure,error
 
-    def DisplayPressures(self,names,pressures):
+    def DisplayPressures(self,names,pressures):                                                             # deprecated, delete
         if self.Flawless and self.PressureWindowExists:
             try:
                 Pressures_support.UpdatePressures(pressures=pressures,names=names)
@@ -535,7 +569,7 @@ class controllBackend:
         else:
             print("no window yet")
     
-    def getPressureDisplayData(self,name):
+    def getPressureDisplayData(self,name):                                                                  # get pressure array from ring-buffer
         time,pressurearr = self.temppressures.returnpressure(name)
         return time,pressurearr
     
@@ -988,23 +1022,22 @@ class Programm: #module for error handling
     def stop(self):
         print ("no module imported")
 
-class Pressurearray: # advanced class of Pressure array with limited time memory
+class Pressurearray:                                                                            # advanced class of Pressure array with limited time memory
     def __init__(self,settings):
         self.settings = settings
         days = settings["pressures.displaytime"]
         self.statearray = []
-        self.seconds = days*24*60*60 #number of seconds
+        self.seconds = days*24*60*60                                                            # number of seconds
 
-    def addpressure(self,pressures,timestamp): #pressures has to be an array
+    def addpressure(self,pressures,timestamp):                                                  # pressures has to be an array
         
-        pressures = [float(i) for i in pressures]
-        self.statearray.append([timestamp,pressures])
-        #first sort out from here
-        threshold = time.time() - self.seconds
-        self.statearray = list(filter(lambda entry: entry[0] >=threshold , self.statearray))
-        print(self.statearray)
+        pressures = [float(i) for i in pressures]                                               # convert whole array to float for safety
+        self.statearray.append([timestamp,pressures])                                           # append to long array
+        threshold = time.time() - self.seconds                                                  # start ring-buffer function -> get threshold time
+        self.statearray = list(filter(lambda entry: entry[0] >=threshold , self.statearray))    # sort out everything older than threshold
 
-    def returnpressure(self,name):
+
+    def returnpressure(self,name):                                                              # returns the whole pressure history for a give gauge name
 
         try:
             index = self.settings["pressures.names"].index(name)
@@ -1015,21 +1048,19 @@ class Pressurearray: # advanced class of Pressure array with limited time memory
             pressure = pressures[:,index]
             pressure = np.array(pressure,dtype=float)
             time = np.array(time,dtype=float)
-        except:
+        except Exception as e:
             time = [0]
             pressure = [0]
             index = self.settings["pressures.names"].index(name)
             temparray = np.array(self.statearray)
-            print(index)
-            print(temparray)
+            print("Pressure not found: " + str(name) + " --> " + str(e))
 
         return time,pressure
 
 
 
-
-
-TheController = controllBackend()
+if __name__ == '__main__':
+    TheController = controllBackend()
 
 
 

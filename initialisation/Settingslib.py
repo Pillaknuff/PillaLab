@@ -1,10 +1,10 @@
 def getDefaultSettings():
-        import serial
-        # nested dictionary
+        import serial                                                                   # needed for datatypes
         settings = {}
-        settings["pressures.readrate"] = 5
+        settings["pressures.readrate"] = 2
         settings["pressures.names"] = ["Mc","Pc","Lamp","MBE"]                      	# names of the pressures to be read, most important referer
-        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML_weird"]    # select type of interface to be used
+        settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2'] # allocation of names to the checkboxes in the Pressure display
+        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML_weird"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
         settings["pressures.controllers"] = [0,0,0,1]                                     # should refer to each individual controller available
         settings["pressures.channels"] = [2,3,1,0]                                        # gives the channel to look for in the individual controlers
         settings["pressures.com"] = ["com7","com8"]                                            # port of the individual controlers, not same number as number of gauges

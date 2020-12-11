@@ -30,6 +30,8 @@ import numpy as np
 import random
 import datetime
 import matplotlib.dates as mdates
+import threading
+import time
 #import copy
 
 def set_Tk_var():
@@ -68,8 +70,9 @@ def init(top, gui, *args, **kwargs):
 
 def destroy_window():
     # Function which closes the window.
-    global top_level
-    print("hey")
+    global top_level, PressGUIActive
+    print("terminating pressure window")
+    PressGUIActive = False
     top_level.destroy()
     top_level = None
     ani._stop = True
@@ -78,15 +81,17 @@ if __name__ == '__main__':
     import Pressures_better
     Pressures_better.vp_start_gui()
 
-def startMainGUI(controlBackend): # main caller
+def startMainGUI(controlBackend):                                                   # main caller
     import Pressures_better
-    global theController, w ,top_level ,root
-    theController= controlBackend #tell everybody about statemashine
-    #Pressures_better.vp_start_gui()
-    #root = tk.Tk()
-    #top_level = root
-    top, w = Pressures_better.create_Toplevel1(theController.root)
-    embeddGraphics()
+    global theController, w ,top_level ,root, PressGUIActive
+    PressGUIActive = True                                                           # Flag used for proper termination of background processes
+    theController= controlBackend                                                   # set the controller (backend) as global instance
+
+    top, w = Pressures_better.create_Toplevel1(theController.root)                  # Create the actual window
+    embeddGraphics()                                                                # Embedd the graphics and start graphic update background process
+    GUIupdateThread = threading.Thread(target=ContinuousGUiUpdate)                  # Create the background process supposely refreshing the GUI
+    GUIupdateThread.start()                                                         # Start GUI refresh
+    
     #root.mainloop()
 
 ## version of create Toplevel for pressures better that seems to work!!
@@ -104,7 +109,7 @@ def startMainGUI(controlBackend): # main caller
 #     print("you pressed {}".format(event.key))
 #     key_press_handler(event, canvas, toolbar)
 
-def embeddGraphics():
+def embeddGraphics():                                                               # function embedding the Mathplotlib-graphics and starting the background threads
     global fig,subplot,t,canvas,ani, toolbar
 
     #fig = Figure(figsize=(5, 4), dpi=100)
@@ -131,15 +136,8 @@ def embeddGraphics():
 
 def updateGraphics(dummy):
     
-    #randnum = random.random()
-    #print("hey , trying to update graphics" + str(randnum))
-    #subplot.set_xdata(t)
-    #subplot.set_ydata(2 * np.sin(random.random() * np.pi * t))
-    # subplot.clear()
-    # subplot.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M  /%d/%m/%Y'))
-    # subplot.xaxis.set_major_locator(mdates.HourLocator(interval=6))
-    widgetlist = [w.ckMc,w.ckPc,w.ckMBE,w.ckLL,w.ckLamp,w.ckFore1,w.ckFore2]
-    boollist = []
+    widgetlist = [w.ckMc,w.ckPc,w.ckMBE,w.ckLL,w.ckLamp,w.ckFore1,w.ckFore2]    # List of checkbox widgets indicating data to be plotted
+    boollist = []                                                               # read checkboxes, not values here, plot all "Trues"
     for widget in widgetlist:
         state = widget.state()
         if ('alternate' in state) or ('selected' in state):
@@ -147,34 +145,27 @@ def updateGraphics(dummy):
         else:
             state = False
         boollist.append(state)
-    #boollist = [bool(w.ckMc.state()),bool(Pcchk.get()),bool(MBEchk.get()),bool(LLchk.get()),bool(Lampchk.get()),bool(Fore1chk.get()),bool(Fore2chk.get())]
-    namelist = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2']
-    # print(boollist)
-    #plt.figure(1)
-    # s = copy.copy( toolbar._views )
-    # p = copy.copy( toolbar._positions )
+
+    namelist = theController.settings["pressures.GUIGraphnames"]                # list of names to the checkboxes
 
     xlim = subplot.get_xlim()
     ylim = subplot.get_ylim()
     subplot.clear()
     subplot.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M  /%d/%m/%Y'))
     subplot.xaxis.set_major_locator(mdates.HourLocator(interval=6))
-    # plt.clear()
-    # plt.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M  /%d/%m/%Y'))
-    # plt.xaxis.set_major_locator(mdates.HourLocator(interval=6))
-    # plt.hold(True)
 
 
-    for i in range(len(boollist)):
-        if boollist[i] and (namelist[i] in theController.settings["pressures.names"]):
-            print(namelist[i])
-            t,p = theController.getPressureDisplayData(namelist[i])
-            t = [datetime.datetime.fromtimestamp(j) for j in t]
-            t = [mdates.date2num(j) for j in t]
-            # if not theController.Flawless:
-            #     print(t)
-            #     print(p)
-            subplot.plot_date(t, p,label=namelist[i])
+    itlength = max([len(boollist),len(namelist)])                               # pre-catch missconfig errors, in which less names configured, than checkboxes!
+    for i in range(itlength):
+        try:
+            if boollist[i] and (namelist[i] in theController.settings["pressures.names"]):
+                t,p = theController.getPressureDisplayData(namelist[i])         # get pressure data from ring-buffer
+                t = [datetime.datetime.fromtimestamp(j) for j in t]
+                t = [mdates.date2num(j) for j in t]                             # two step datetime converstion of the time axis
+
+                subplot.plot_date(t, p,label=namelist[i])                       # plot this pressure entry
+        except Exception as e:                                                  # catch missconfig errors
+            print("Error in GUI update, probably wront configuration of the name list: " + str(e))
     
     
 
@@ -194,7 +185,11 @@ def updateGraphics(dummy):
 
     
 
-
+def ContinuousGUiUpdate():
+    while PressGUIActive:
+        names,pressures = theController.GetPressures()
+        UpdatePressures(pressures,names)
+        time.sleep(theController.settings["pressures.displaytime"])
 
 def UpdatePressures(pressures,names):
     for p, n in zip(pressures, names):
@@ -212,15 +207,10 @@ def UpdatePressures(pressures,names):
         else:
             found = False
          
-    #w.Display.delete('1.0',tk.END)
-    #print('PressureUpdate')
-    #sys.stdout.flush()
-        p_str = '{:0.2e}'.format(p)         # god-like badass string formatting to two digits in exponential representation
+        p_str = '{:0.2e}'.format(p)                                                 # god-like badass string formatting to two digits in exponential representation
         if found:
             disp.config(text=p_str)
-    #print('beep')
-    #updateGraphics()
-    #embeddGraphics()
+
 
 
 
