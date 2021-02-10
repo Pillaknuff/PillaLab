@@ -76,10 +76,11 @@ def init(top, gui, *args, **kwargs):
 
 def startMainGUI(controlBackend): # main caller
     import Cell_control3
-    global theController, w ,top_level ,root, Tselectors, Tsettinpoints, Tramps, Shutterselectors, Cellnames, Tdisplays, BepDisplays,Autotuneboxes,Eventlist, substratenentrynumber
+    global theController, w ,top_level ,root, Tselectors, Tsettinpoints, Tramps, Shutterselectors, Cellnames, Tdisplays, BepDisplays,Autotuneboxes,Eventlist, substratenentrynumber, substratecontrolernickname
     
     substratenentrynumber = 6 # used to refer to substrate as an special entry, by default the last one
     theController= controlBackend #tell everybody about statemashine
+    substratecontrolernickname = theController.settings["growthcontrol.Controlernicknames"][len(theController.settings["growthcontrol.Controlernicknames"])-1]
     top, w = Cell_control3.create_Toplevel1(theController.root)  # create initial window process
 
     # make global lists of widgets *********
@@ -129,7 +130,7 @@ def GuiRefresher():                                                             
             if not i == substratenentrynumber:
                 channel = Tselectors[i].get()
             else:
-                channel = "substrate"
+                channel = substratecontrolernickname     # the last entry is always the controller
 
             if channel in theController.settings["growthcontrol.Controlernicknames"]:
                 Tresponse = theController.ReadTemperature(channel)
@@ -156,7 +157,7 @@ def setTemperature(controler):
     if not controler == substratenentrynumber:                                                  # check, whether the given controler is the substrate, if not, get the corresponding selected entry
         channel = Tselectors[controler].get()                                                   # read dropdown menu value from respective field
     else:
-        channel = "substrate"
+        channel = substratecontrolernickname
 
     autotune = getAutotuneVal(controler)                                                        # check if supposed to autotune
     setpoint = Tsettinpoints[controler].get()
@@ -175,7 +176,7 @@ def rampTemperature(controler):
     if not controler == substratenentrynumber:
         channel = Tselectors[controler].get()
     else:
-        channel = "substrate"
+        channel = substratecontrolernickname
 
     autotune = getAutotuneVal(controler)                                                        # check if supposed to autotune
     setpoint = Tsettinpoints[controler].get()
