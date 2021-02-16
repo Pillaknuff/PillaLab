@@ -2,17 +2,17 @@ def getDefaultSettings():
         import serial                                                                   # needed for datatypes
         settings = {}
         settings["pressures.readrate"] = 2
-        settings["pressures.names"] = ["Mc","Pc","Lamp","MBE"]                      	# names of the pressures to be read, most important referer
+        settings["pressures.names"] = ["Mc","Pc","Lamp","MBE","BFM"]                      	# names of the pressures to be read, most important referer
         settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2'] # allocation of names to the checkboxes in the Pressure display
         settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML_weird"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
-        settings["pressures.controllers"] = [0,0,0,1]                                     # should refer to each individual controller available
-        settings["pressures.channels"] = [2,3,1,0]                                        # gives the channel to look for in the individual controlers
-        settings["pressures.com"] = ["com7","com8"]                                            # port of the individual controlers, not same number as number of gauges
-        settings["pressures.baud"] = [9600,2400]                                             # separated list for each controler
-        settings["pressures.bits"] = [8,8]                                                # ...same for bits and so on
-        settings["pressures.parity"] = [serial.PARITY_NONE,serial.PARITY_NONE]
-        settings["pressures.timeout"] = [0.5,0.5]
-        settings["pressures.stopbits"] = [1,1]                     
+        settings["pressures.controllers"] = [0,0,0,1,2]                                     # should refer to each individual controller available
+        settings["pressures.channels"] = [2,3,1,0,0]                                        # gives the channel to look for in the individual controlers
+        settings["pressures.com"] = ["com7","com8","com14"]                                            # port of the individual controlers, not same number as number of gauges
+        settings["pressures.baud"] = [9600,2400,9600]                                             # separated list for each controler
+        settings["pressures.bits"] = [8,8,8]                                                # ...same for bits and so on
+        settings["pressures.parity"] = [serial.PARITY_NONE,serial.PARITY_NONE,serial.PARITY_NONE]
+        settings["pressures.timeout"] = [0.5,0.5,0.5]
+        settings["pressures.stopbits"] = [1,1,1]                     
         settings["pressures.displaytime"] = 2                       # Capture rate for displayin pressures
 
         settings["internal.readpressures"] = False                  # Flag to turn off pressure read
@@ -94,7 +94,8 @@ def getDefaultSettings():
         settings["logging.log"] = True                                              # Flag to decide whether to log things like pressures
         settings["logging.filename"] = "logfile.h5"                                 # Name of the logfile, can already exist
         settings["logging.groupname"] = "day_"                                      # name of hdf5 group, will be incremented
-        settings["logging.folder"] = "C:/Users/Philipp/Desktop/temp/"               # folder to log everything into
+        #settings["logging.folder"] = "C:/Users/Philipp/Desktop/temp/"               # folder to log everything into
+        settings["logging.folder"] = "C:/Users/MBEcontrol/Documents/Measurements/GrowthLog"
         
         settings["mapping.sesPulltime"] = 1                                         # time in seconds between pulling SES window and sending shortcut
         settings["mapping.stabletime"] = 1                                          # used to decide when movement is stable, dumb waiting without scaling
@@ -118,22 +119,22 @@ def getDefaultSettings():
         # settings["PyTango.dummymode"] = True
 
         # ******************************************************settings section for growth control*********************************************
-        settings["growthcontrol.Controlerallocation"] = [[0,0],[0],[0]]             # Allocation of the different Controllers to the respective fields (GUI definition)
+        settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[6]]             # Allocation of the different Controllers to the respective fields (GUI definition)
         settings["growthcontrol.Fieldnames"] = ["Te","Bi2Te3","MnTe","Tm", "BaF2", "Quad"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
 
         # backend definitions -> binding of pid controlers
         settings["growthcontrol.comPIDs"] = True
         settings["growthcontrol.Controlernicknames"] = ["Wine","Vodka","Rum","Cachassa","Tequilla","Whiskey","Beer"]      # refering name of the Eurotherms, has to be unique!
-        settings["growthcontrol.standardramprates"] = [10,10,10,10,10,10]                       #
+        settings["growthcontrol.standardramprates"] = [10,10,10,10,10,10,10]                       #
         settings["growthcontrol.bepposition"] = ["Bi2Te3","open","open","open","open","open"]                          # for each Cell gives the setting of the shutter, which should be used for bep reading
-        settings["growthcontrol.com"] = ['com23','com23']                           # com adresses of the individual eurotherms
-        settings["growthcontrol.slaveadress"] = [1,1,1,1,1,1]                               # slaveadresses, standard is 1
-        settings["growthcontrol.baud"] = [9600,9600,9600,9600,9600,9600]                                # baud rate for eurotherms, standard is 9600
-        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408']          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
-        settings["growthcontrol.useexternalPIDvals"] = [False,False,False,False,False,False]                   # if set to True, uses own PID settings and pushes them to device
-        settings["growthcontrol.PIDswitchingpoints"] = [[200,400,800],[200,400,800]]                            # Temperature points for each controler, for which the PID range will be changed (see values below)
-        settings["growthcontrol.externalPIDs"] = [[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)]]          # Software controled PID sets in  controler -> [(PID up to T1),(PID up to T2),...]
+        settings["growthcontrol.com"] = ['com10','com11','com4','com13','com5','com9','com6']                           # com adresses of the individual eurotherms
+        settings["growthcontrol.slaveadress"] = [1,1,1,1,1,1,1]                               # slaveadresses, standard is 1
+        settings["growthcontrol.baud"] = [9600,9600,9600,9600,9600,9600,9600]                                # baud rate for eurotherms, standard is 9600
+        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408']          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
+        settings["growthcontrol.useexternalPIDvals"] = [False,False,False,False,False,False,False]                   # if set to True, uses own PID settings and pushes them to device
+        settings["growthcontrol.PIDswitchingpoints"] = [[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800]]                            # Temperature points for each controler, for which the PID range will be changed (see values below)
+        settings["growthcontrol.externalPIDs"] = [[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)]]          # Software controled PID sets in  controler -> [(PID up to T1),(PID up to T2),...]
 
         settings["growthcontrol.PressureChannels"] = ["MBE","BFM"]                                              # Used to collect pressures for chamber and monitor
 

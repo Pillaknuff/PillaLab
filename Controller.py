@@ -506,6 +506,7 @@ class controllBackend:
         while self.pollPressures:
             try:                                                                                            # the whole logging is done here, to provide evenly spaced data, if re-read is triggered, the triggering program should write it's own log!
                 self.pressurenames,self.pressures = self.__GetPressures()
+                #print("I'm here and the pressure is" + str(self.pressures))
                 self.temppressures.addpressure(self.pressures,time.time())                                  # write pressure into temporary array
                 if self.settings["logging.log"]:                                                            # if required, log the pressure to hdf5-file
                     self.LogPressure(self.pressures)
