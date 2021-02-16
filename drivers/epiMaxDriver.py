@@ -32,7 +32,15 @@ from functools import partial
 # Which has initial support for functioncode 23 in read_string and read_float, which is
 # necessary for this driver. It will be attempted for this to be mainlined, but it may
 # take time.
-import minimalmodbus
+try: 
+    sys.path.insert("/drivers")
+except:
+    print("obviously driver not called from top window")
+try:
+    import drivers.minimalmodbus_adapted.minimalmodbus as minimalmodbus
+except:
+    import minimalmodbus_adapted.minimalmodbus as minimalmodbus
+
 
 # This driver is Python 2 and 3, but you cannot use
 #
@@ -40,7 +48,10 @@ import minimalmodbus
 #
 # in the program running using it, since minimal modbus is missing a few corners in the
 # conversion to Python 2 and 3 support
-from PyExpLabSys.common.supported_versions import python2_and_3
+try:
+    from driveraddons.supported_versions import python2_and_3
+except:
+    from drivers.driveraddons.supported_versions import python2_and_3
 python2_and_3(__file__)
 
 
@@ -65,7 +76,7 @@ class PVCCommon(minimalmodbus.Instrument):
     global_id = None
     firmware_name = None
 
-    def __init__(self, port, slave_address=1, check_hardware_version=True):
+    def __init__(self, port, slave_address=1, check_hardware_version=False):
         """Initialize communication
         Args:
             port (unicode): The port specification of the device e.g. '/dev/????'
@@ -77,6 +88,7 @@ class PVCCommon(minimalmodbus.Instrument):
             port=port,
             slaveaddress=slave_address,
         )
+        
         # fields is a the list of all the parameters that are common for all three types of
         # devices. It is a dict where keys are adapted parameter names and the values are
         # typles of (addres, type_or_type_convertion_function, unit)
@@ -120,7 +132,7 @@ class PVCCommon(minimalmodbus.Instrument):
             'bake_out_setpoint': (0xEC, 'float', 'C'),
             'remaining_bake_out_time': (0xEE, 'float', 'h'),
         }
-
+        
         if check_hardware_version:
             # Check that this is the correct hardware
             ids = self.get_fields(['global_id', 'firmware_version'])
@@ -256,6 +268,7 @@ class PVCi(PVCCommon):
 def bytes_to_firmware_version(bytes_):
     """Convert 4 bytes to firmware type and version"""
     # Reverse order
+    print(str(bytes_))
     bytes_ = bytes_[::-1]
     # The first two bytes identify the unit type (using UNIT_TYPE for conversion)
     if sys.version_info.major == 2:
@@ -263,8 +276,10 @@ def bytes_to_firmware_version(bytes_):
     else:
         bytes_as_ints = bytes_
 
+    print(str(bytes_as_ints))
     unit_code = tuple(bytes_as_ints[:2])
     unit_type = UNIT_TYPE[unit_code]
+    #unit_type = "PVCiDuo"
 
     # The last two are integer major and minor parts of the version
     version = '{}.{}'.format(*bytes_as_ints[2:])
@@ -502,7 +517,7 @@ def run_module():
     log.setLevel(logging.DEBUG)
     # '/dev/serial/by-id/usb-FTDI_USB-RS485_Cable_FTY3M2GN-if00-port0'
     #pvci = PVCi('/dev/serial/by-id/usb-FTDI_USB-RS485_Cable_FTY3M2GN-if00-port0')
-    pvci = PVCi('/dev/ttyUSB0')
+    pvci = PVCi('com14')
     from pprint import pprint
 
     pprint(pvci.get_fields('all'))

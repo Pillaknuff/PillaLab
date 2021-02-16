@@ -94,13 +94,27 @@ class aSerial:
             return ans
     
     def ReadAMLGaugeSingle(self,channel):
-        message = '*O0' + str(channel) + '\r\n'
+        message = '*S0' + str(channel) + '\r\n'
         ans,err = self.ReadWrite(message)
         ans = ans.replace('\r','')
         ans = ans.replace('\n','')
         #Place to further process this string!
-        print(ans)
-        return ans
+        if channel == 0:
+            try:
+                p1 = ans.split(",")[0].split("@")[2]
+            except Exception as e:
+                print("Error in AML readings conversion p1")
+                p1 = 'nan'
+            return p1
+        elif channel == 1:
+            try:
+                p2 = ans.split(",")[1].split("@")[1]
+            except Exception as e:
+                print("Error in AML readings conversion p2")
+                p2 = 'nan'
+            return p2
+        else:
+            return 'nan'
 
     def ReadWeirdAMLGaugeSingle(self,channel,recursion=0):
         # function for reading this AML gauge in screaming mode

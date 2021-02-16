@@ -4,11 +4,11 @@ def getDefaultSettings():
         settings["pressures.readrate"] = 2
         settings["pressures.names"] = ["Mc","Pc","Lamp","MBE","BFM"]                      	# names of the pressures to be read, most important referer
         settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2'] # allocation of names to the checkboxes in the Pressure display
-        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML_weird"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
+        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML","epiMaxUni"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
         settings["pressures.controllers"] = [0,0,0,1,2]                                     # should refer to each individual controller available
         settings["pressures.channels"] = [2,3,1,0,0]                                        # gives the channel to look for in the individual controlers
         settings["pressures.com"] = ["com7","com8","com14"]                                            # port of the individual controlers, not same number as number of gauges
-        settings["pressures.baud"] = [9600,2400,9600]                                             # separated list for each controler
+        settings["pressures.baud"] = [9600,9600,9600]                                             # separated list for each controler
         settings["pressures.bits"] = [8,8,8]                                                # ...same for bits and so on
         settings["pressures.parity"] = [serial.PARITY_NONE,serial.PARITY_NONE,serial.PARITY_NONE]
         settings["pressures.timeout"] = [0.5,0.5,0.5]
@@ -120,7 +120,7 @@ def getDefaultSettings():
 
         # ******************************************************settings section for growth control*********************************************
         settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[6]]             # Allocation of the different Controllers to the respective fields (GUI definition)
-        settings["growthcontrol.Fieldnames"] = ["Te","Bi2Te3","MnTe","Tm", "BaF2", "Quad"]                # Naming of the GUI fields
+        settings["growthcontrol.Fieldnames"] = ["Quad","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
 
         # backend definitions -> binding of pid controlers

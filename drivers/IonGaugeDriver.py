@@ -56,6 +56,7 @@ class IonGaugeTalker:
             ]
         for wordpair in wordpairlist:
             try:
+                print(self.settings[[wordpair[1]]][conum])
                 settingsRs[wordpair[0]] = self.settings[[wordpair[1]]][conum]
             except Exception as e:
                 print("Error while sorting Pressure gauge settings: " + str(e))
