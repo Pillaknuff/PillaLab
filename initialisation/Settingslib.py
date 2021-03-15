@@ -2,11 +2,11 @@ def getDefaultSettings():
         import serial                                                                   # needed for datatypes
         settings = {}
         settings["pressures.readrate"] = 2
-        settings["pressures.names"] = ["Mc","Pc","Lamp","MBE","BFM"]                      	# names of the pressures to be read, most important referer
+        settings["pressures.names"] = ["Mc","Pc","Lamp","MBE","Fore1","BFM"]                      	# names of the pressures to be read, most important referer
         settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2'] # allocation of names to the checkboxes in the Pressure display
-        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML","epiMaxUni"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
-        settings["pressures.controllers"] = [0,0,0,1,2]                                     # should refer to each individual controller available
-        settings["pressures.channels"] = [2,3,1,0,0]                                        # gives the channel to look for in the individual controlers
+        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML","AML","epiMaxUni"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
+        settings["pressures.controllers"] = [0,0,0,1,1,2]                                     # should refer to each individual controller available
+        settings["pressures.channels"] = [2,3,1,0,1,0]                                        # gives the channel to look for in the individual controlers
         settings["pressures.com"] = ["com7","com8","com14"]                                            # port of the individual controlers, not same number as number of gauges
         settings["pressures.baud"] = [9600,9600,9600]                                             # separated list for each controler
         settings["pressures.bits"] = [8,8,8]                                                # ...same for bits and so on
@@ -15,7 +15,7 @@ def getDefaultSettings():
         settings["pressures.stopbits"] = [1,1,1]                     
         settings["pressures.displaytime"] = 2                       # Capture rate for displayin pressures
 
-        settings["internal.readpressures"] = False                  # Flag to turn off pressure read
+        settings["internal.readpressures"] = True                  # Flag to turn off pressure read
         #settings["internal.round"] = 1                             # unused
         # 
         # ************************************************** Stepper section *****************************************************************************                

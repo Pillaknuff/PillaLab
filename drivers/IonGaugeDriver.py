@@ -17,8 +17,9 @@ class IonGaugeTalker:
                 self.interfaces[self.settings["pressures.names"][i]] = [rs232connector,self.settings["pressures.channels"][i],self.settings["pressures.types"][i],error]
                 self.controllers[conum] = rs232connector
             else:
+                print(self.settings["pressures.names"][i])
                 rs232connector = self.controllers[conum]
-                self.interfaces[self.settings["pressures.names"][i]] = [rs232connector,self.settings["pressures.channels"][i],self.settings["pressures.types"][i]]
+                self.interfaces[self.settings["pressures.names"][i]] = [rs232connector,self.settings["pressures.channels"][i],self.settings["pressures.types"][i],False]
             
 
 
@@ -56,8 +57,7 @@ class IonGaugeTalker:
             ]
         for wordpair in wordpairlist:
             try:
-                print(self.settings[[wordpair[1]]][conum])
-                settingsRs[wordpair[0]] = self.settings[[wordpair[1]]][conum]
+                settingsRs[wordpair[0]] = self.settings[wordpair[1]][conum]
             except Exception as e:
                 print("Error while sorting Pressure gauge settings: " + str(e))
         return settingsRs
@@ -77,11 +77,16 @@ class IonGaugeTalker:
                     p = str(random.random())#'0'
             elif tp == "AML_weird":
                 p = interf.ReadWeirdAMLGaugeSingle(channel)
-            elif tp == "epiMaxUni":         # read special epi-max driver
-                if channel == 1:
-                    p = interf.ion_gauge_1_pressure
-                elif channel == 2:
-                    p = interf.slot_a_value_1
+            elif tp == "AML":
+                p = interf.ReadAMLGaugeSingle(channel)
+            # elif tp == "epiMaxUni":         # read special epi-max driver
+            #     try:
+            #         if channel == 1:
+            #             p = interf.ion_gauge_1_pressure
+            #         elif channel == 2:
+            #             p = interf.slot_a_value_1
+            #     except:
+            #         p = "0"
             else:                           # include aml here later
                 p = "0"
 
@@ -103,7 +108,7 @@ class IonGaugeTalker:
         else:
             p = float("nan")
             
-
+        print("orkingtillhere")
         return p, error
 
     def readall(self):
@@ -111,6 +116,7 @@ class IonGaugeTalker:
         pressures = []
         errors = []
         for name in self.settings["pressures.names"]:
+            #print(name)
             p = self.readone(name)
             names.append(name)
             pressures.append(p[0])

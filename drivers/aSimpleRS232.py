@@ -101,7 +101,7 @@ class aSerial:
         #Place to further process this string!
         if channel == 0:
             try:
-                p1 = ans.split(",")[0].split("@")[2]
+                p1 = ans.split(",")[0].split("@")[3]
             except Exception as e:
                 print("Error in AML readings conversion p1")
                 p1 = 'nan'

@@ -506,8 +506,9 @@ class controllBackend:
         while self.pollPressures:
             try:                                                                                            # the whole logging is done here, to provide evenly spaced data, if re-read is triggered, the triggering program should write it's own log!
                 self.pressurenames,self.pressures = self.__GetPressures()
-                #print("I'm here and the pressure is" + str(self.pressures))
+                print("I'm here and the pressure is" + str(self.pressures))
                 self.temppressures.addpressure(self.pressures,time.time())                                  # write pressure into temporary array
+                print("next step")
                 if self.settings["logging.log"]:                                                            # if required, log the pressure to hdf5-file
                     self.LogPressure(self.pressures)
             except Exception as e:
@@ -518,6 +519,7 @@ class controllBackend:
     def __GetPressures(self):                                                                               # internal function for actual communicaiton
         if self.settings["internal.readpressures"]:
             names,pressures,errors = self.ionGaugeTalker.readall()                                          # call ion gauge driver-wrapper (all ion gauges under one caller)
+            print(pressures)
             return names,pressures
         else:                                                                                               # case for dumy testing, remove later
             return self.settings["pressures.names"], np.random.rand(len(self.settings["pressures.names"]))
