@@ -332,6 +332,8 @@ def startLog():
 def endLogging():
     theController.EndGrowthLog()
 
+#****************** Graphics section ******************************
+
 # ********************** indvidually forwarded commands************
 def openS1():
     openShutter(0)
