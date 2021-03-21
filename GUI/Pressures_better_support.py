@@ -204,6 +204,10 @@ def UpdatePressures(pressures,names):
             disp = w.PMBEdisp
         elif n == "Lamp":
             disp = w.PHedisp
+        elif n == "Fore1":
+            disp = w.PP1disp
+        elif n == "Fore2":
+            disp = w.PP2disp
         else:
             found = False
          

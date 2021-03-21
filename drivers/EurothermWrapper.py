@@ -39,7 +39,7 @@ class EurothermWrapper:
                     error = False
                     myeurotherm = eurotherm.eurotherm2408(port,slaveAddress=slavead,baudrate=baud)
                 except Exception as e:
-                    print("error, while initializing eurotherm: " + str(e))
+                    print("error, while initializing eurotherm at port " + str(port) + ": " + str(e))
                     error = True
             else:
                 error = True
