@@ -139,7 +139,7 @@ def getDefaultSettings():
         settings["growthcontrol.PressureChannels"] = ["MBE","BFM"]                                              # Used to collect pressures for chamber and monitor
 
         settings["growthcontrol.Shutterstates"] = [["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed","openright","Bi2Te3","MnTe"]] # open and closed should always be refered to as open and closed! rest is optiona!
-        settings["growthcontrol.ShutterstateAngles"] = [[180,0],[180,0],[180,0],[180,0],[180,0],[90,0,-90,-30,30]]
+        settings["growthcontrol.ShutterstateAngles"] = [[90,0,-90,-30,30],[180,0],[180,0],[180,0],[180,0],[180,0]]
         settings["growthcontrol.GUIpolltime"] = 1                                                                # GUI refresh every t seconds
         settings["growthcontrol.shutternames"] = ["s1","s2","s3","s4","s5","s6"]                                                     # names of the shutter assignet to the induvidual cells
         

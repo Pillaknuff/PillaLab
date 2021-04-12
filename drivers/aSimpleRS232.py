@@ -90,7 +90,7 @@ class aSerial:
             message = '#0002I' + str(channel) + '\r'
             ans,err = self.ReadWrite(message)
             ans = ans.replace('\r','')
-            print(ans)
+            #print(ans)
             return ans
     
     def ReadAMLGaugeSingle(self,channel):

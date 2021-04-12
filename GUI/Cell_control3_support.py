@@ -212,12 +212,13 @@ def measureBEP(controler):
     BepThread.start()
 
 def performBEPmeasurementAndUpdate(controler):
+    print("PerformingBEPMesurement")
     error = False
     try:
         channel = Tselectors[controler].get()
         shutter = theController.settings["growthcontrol.Shutterallocation"][controler]
     except Exception as e:
-        print(e)
+        print("Error in BEP measurement: " + str(e))
         error = True
     if not error:
         newBEP = theController.measureBEP(channel,shutter)

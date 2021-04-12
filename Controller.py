@@ -506,9 +506,9 @@ class controllBackend:
         while self.pollPressures:
             try:                                                                                            # the whole logging is done here, to provide evenly spaced data, if re-read is triggered, the triggering program should write it's own log!
                 self.pressurenames,self.pressures = self.__GetPressures()
-                print("I'm here and the pressure is" + str(self.pressures))
+                #print("I'm here and the pressure is" + str(self.pressures))
                 self.temppressures.addpressure(self.pressures,time.time())                                  # write pressure into temporary array
-                print("next step")
+                #print("next step")
                 if self.settings["logging.log"]:                                                            # if required, log the pressure to hdf5-file
                     self.LogPressure(self.pressures)
             except Exception as e:
@@ -519,7 +519,7 @@ class controllBackend:
     def __GetPressures(self):                                                                               # internal function for actual communicaiton
         if self.settings["internal.readpressures"]:
             names,pressures,errors = self.ionGaugeTalker.readall()                                          # call ion gauge driver-wrapper (all ion gauges under one caller)
-            print(pressures)
+            #print(pressures)
             return names,pressures
         else:                                                                                               # case for dumy testing, remove later
             return self.settings["pressures.names"], np.random.rand(len(self.settings["pressures.names"]))
@@ -674,8 +674,24 @@ class controllBackend:
             Tunethread.start()
     
     def ReadTemperature(self,controlername):
-        temp = self.PIDCommunicator.readTemperature(controlername)
+        success = False
+        timeout = 5
+        i = 0
+        while not success and i < timeout:
+            temp = self.PIDCommunicator.readTemperature(controlername)
+            try:
+                temp = float(temp)
+                success = True
+                break
+            except:
+                temp = 0
+                success = False
+                print("Eurotherm had a hickup and returned none")
+
+            i += 1
         self.LogAction('Tread',controlername,temp)
+        if not success:
+            print("Eurotherm reading timed out on: " + str(controlername))
         return temp
     
     
@@ -778,7 +794,7 @@ class controllBackend:
     # backing functions**************************************************
     def LogAction(self,what,name,value=0):
         if self.LogGrowth:
-            print(str(what) + " " + str(name) + " : " + str(value))
+            #print(str(what) + " " + str(name) + " : " + str(value))
             if what == 'Shuttercalibration':
                 self.GrowthLogger.logEntry('EventLog','Shutter ' + str(name) + ' calibrated to ' + str(value))
             elif what == 'Shuttermove':
@@ -799,10 +815,12 @@ class controllBackend:
                 print("Logging unknown Tag discovered "+ str(what))
     
     def StartGrowthLog(self,filename,username=''):
+        print("Starting Growth Log")
         self.LogGrowth = True
         self.GrowthLogger = Logging.UniversalLoggingTool(self.settings,filename,user=username,groupmask="growthlog")
     
     def EndGrowthLog(self):
+        print("Ending Growth Log")
         self.LogGrowth = False
         self.GrowthLogger.stoplog()
         self.GrowthLogger = ""
@@ -814,7 +832,7 @@ class controllBackend:
     
     # ********* Prodedures for logging ****************************************************************************************************************************************
     def LogPressure(self,pressures):
-        print ("will be logging " + str(time.time()) + " " + str(pressures))
+        #print ("will be logging " + str(time.time()) + " " + str(pressures))
         pressuresfloat = []
         for pressure in pressures:#in principle not necessary any more...but whatever
             try:

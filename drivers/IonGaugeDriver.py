@@ -17,7 +17,7 @@ class IonGaugeTalker:
                 self.interfaces[self.settings["pressures.names"][i]] = [rs232connector,self.settings["pressures.channels"][i],self.settings["pressures.types"][i],error]
                 self.controllers[conum] = rs232connector
             else:
-                print(self.settings["pressures.names"][i])
+                #print(self.settings["pressures.names"][i])
                 rs232connector = self.controllers[conum]
                 self.interfaces[self.settings["pressures.names"][i]] = [rs232connector,self.settings["pressures.channels"][i],self.settings["pressures.types"][i],False]
             
