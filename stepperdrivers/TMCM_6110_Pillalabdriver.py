@@ -51,17 +51,19 @@ class Stepper():
 #**********mapping of nomenclature on internal functions*************************
     def go_abs(self,mot,val):
         newstate = val
+        #print("trinamic taking request " + str(mot) + " "+str(val))
         try:
             val = int(round(val *(self.settings["steppers.stepsperunit"][mot])))
-        except:
+        except Exception as e:
+            print("error in trinamic driver in go abs: " + str(e))
             return True, 0
 
         #motnm = self.channels[self.names.index(mot)]
         self.__default_motor = mot #set motor
 
-        print("abs move requested")
+        print("abs move requested to " + str(val) + " at motor " + str(self.__default_motor))
         self.moveTo(val,self.velocities[mot])
-
+        #self.moveTo(val)
         return False, 0
 
     def go_rel(self,mot,val):
@@ -142,11 +144,12 @@ class Stepper():
     def set_pos(self,mot,newpos):
         self.__default_motor = self.names[mot]
         try:
-            newpos = int(round(newpos *(self.settings["steppers.stepsperunit"][index])))
+            newpos = int(round(newpos *(self.settings["steppers.stepsperunit"][mot])))
         except Exception as e:
             print("error setting trinamic position " + str(e))
             
         self.setActualPosition(newpos)
+        self.moveTo(newpos,self.velocities[mot])
 
 #*****************actual out in commands**************************
     # Pilla implemented methods

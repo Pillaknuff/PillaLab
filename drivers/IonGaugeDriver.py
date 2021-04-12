@@ -108,7 +108,6 @@ class IonGaugeTalker:
         else:
             p = float("nan")
             
-        print("orkingtillhere")
         return p, error
 
     def readall(self):

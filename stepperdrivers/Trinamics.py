@@ -359,7 +359,7 @@ class Stepper:
 
     def __ReadWrite(self,Command):
         #self.serial.open()
-        print("attempting to write " + Command)
+        #print("attempting to write " + Command)
         
 
         try:

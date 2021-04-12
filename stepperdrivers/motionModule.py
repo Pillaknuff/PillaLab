@@ -12,6 +12,8 @@ class MotionModule:
         self.interfaces = {}
         self.controllers = np.zeros(max(self.settings["motion.controllers"])+1).tolist()
 
+        #print("Initializing motion Module with settings: " + str(self.settings))
+
         for i in range(len(self.settings["motion.names"])):
             conum = settings["motion.controllers"][i]
             if self.controllers[conum] == 0: #then init, otherwise just enter
@@ -60,7 +62,9 @@ class MotionModule:
         return automatizer
 
     def go_abs(self,motname,pos):
+        print("asked to move something")
         interface,channel = self.interfaces[motname]
+        #print(interface)
         err = interface.go_abs(channel,pos)
         return err
 

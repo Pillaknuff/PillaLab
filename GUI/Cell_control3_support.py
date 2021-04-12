@@ -251,11 +251,16 @@ def setShutter(field):
 
 def calibShutter(field):
     print("calibrating shutter")
-    outtext = "Please read shutter angle and enter into input console!"
-    w.GPIO_text.delete("1.0",tk.END)
-    w.GPIO_text.insert("1.0",outtext)
-    calibThread = threading.Thread(target=WaitForCalibInput,args=[field])
-    calibThread.start()
+    # outtext = "Please read shutter angle and enter into input console!"
+    # w.GPIO_text.delete("1.0",tk.END)
+    # w.GPIO_text.insert("1.0",outtext)
+    #calibThread = threading.Thread(target=WaitForCalibInput,args=[field])
+    #calibThread.start()
+    try:
+        myshutter = theController.settings["growthcontrol.Shutterallocation"][field]
+        theController.CalibShutterPosition(myshutter,0)
+    except Exception as e:
+        print("error in shutter gui calib: " + str(e))
 
 def WaitForCalibIntput(field):
     myEvent = threading.Event() # used for effective waitint

@@ -52,7 +52,7 @@ class aSerial:
     
     def ReadWrite(self,Command):
         #self.serial.open()
-        print("attempting to write " + Command)
+        #print("attempting to write " + Command)
         
 
         try:
@@ -152,6 +152,7 @@ class aSerial:
                 else:
                     return 'nan'
         else:
+            print(ans)
             return "nan"
 
     """

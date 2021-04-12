@@ -748,13 +748,12 @@ class controllBackend:
 
     def SetShutterState(self,shutter,state):                                                                                            # a Shutter is always refered by a number!
         # 0 is closed, 1 is open, rest depends on system
-        print('Trying to set shutter ' + str(shutter) + ' in state '+ str(state) + 'but fail because of missing implementation...')
+        #print('Trying to set shutter ' + str(shutter) + ' in state '+ str(state) + 'but fail because of missing implementation...')
         self.LogAction('Shuttermove',shutter,state)
         self.physicalStateDict[str(shutter)] = str(state)
-
         try:
             shuttername = self.settings["growthcontrol.shutternames"][shutter]
-            shutterangle = self.settings["growthcontrol.ShutterstateAngles"][self.settings["growthcontrol.Shutterstates"][shutter].index(state)]
+            shutterangle = self.settings["growthcontrol.ShutterstateAngles"][shutter][self.settings["growthcontrol.Shutterstates"][shutter].index(state)]
             error = False
         except Exception as e:
             if not str(shutter) == "substrate":                                                                                               # supress error, if shutter cannot be found, elegant, as that way a substrate shutter could be easily implemented, but errors are ignored 
@@ -762,7 +761,6 @@ class controllBackend:
             error = True
         
         if not error:
-            print("mau?")
             self.motionModule.go_abs(shuttername,shutterangle)
 
     def CalibShutterPosition(self,shutter,actualstate):
