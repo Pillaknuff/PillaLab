@@ -1,4 +1,3 @@
-"""
 Pillalab - Python version
 -> a comprehensive adaptable multi-threading package for lab control purposes
 -> Manipulator Control, Pressure reading, automated mapping, network communication, Growth control, BEP measurements
@@ -23,7 +22,7 @@ Has own namespace in settings with motion.***
 
 v 2.0 - latest changes 19.07.2020*********************************
 
-For more Documentation see UML model
+
 
 Changelog: 
 AML reader implemented
@@ -72,6 +71,7 @@ Dependencies:
 - tested with python 3.7, 3.8
 - not compatible with python 2
 - tested on windows 10
+- GUI's created with WinPage
 
 Communication Channels used:
 - RS-232 -> used for most device communication applications
@@ -79,8 +79,15 @@ Communication Channels used:
 
 A short guide to the program structure:
 - Main Process file: Controller.py -> start main process, crate main GUI window
-- GUI Applications <-> Controller <-> backend, drivers, network, logging, ...
-- All GUI Requests are re-mapped on Controller functions to enable intercepting, error catching, poll-frequenzy reductions, ....
+- General structure of the Code:
+    - GUI Applications <-> Controller <-> backend, drivers, network, logging, ...
+    - All graphic interfaces are stored in the GUI folder, for each window there is a WINDOWNAME.py file and a corresponding WINDOWNAME_support.py file, the first is the style definition, the second defines functions
+    - All GUI Requests are re-mapped on Controller functions to enable intercepting, error catching, poll-frequenzy reductions, ....
+    - Devices are spoken to using driver files stored in ./drivers and ./stepperdrivers (for stepper motor drivers)
+    - Out of historical reasons there is a standard stepper driver implementation for moving motors (e.g. manipulator control) and the "motion module" to wrap around multiple stepper drivers (e.g. used for shutter opening)
 - Settings are written into a dict, can be updated, stored externally to avoid loosing them, settings will be given to all GUI's and drivers upon startup
     - at the current point it is not guaranteed, that a settings change is transfered to all devices during runtime, a restart is required exept for specific cases
 - Once settings are changed the standard settings do not apply anymore, a file called settings.p (pickle file) will be read instead.
+
+
+Keep in mind, not everything is finished (yet)
