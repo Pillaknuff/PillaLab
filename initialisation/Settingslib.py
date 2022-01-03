@@ -2,14 +2,14 @@ def getDefaultSettings():
         import serial                                                                   # needed for datatypes
         settings = {}
         settings["pressures.readrate"] = 2
-        settings["pressures.names"] = ["Mc","Pc","Lamp","MBE","Fore1","BFM"]                      	# names of the pressures to be read, most important referer
-        settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','Lamp','Fore1','Fore2'] # allocation of names to the checkboxes in the Pressure display
-        settings["pressures.types"] = ["VarianBA","VarianBA","VarianBA","AML","AML","epiMaxUni"]    # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
-        settings["pressures.controllers"] = [0,0,0,1,1,2]                                     # should refer to each individual controller available
-        settings["pressures.channels"] = [2,3,1,0,1,0]                                        # gives the channel to look for in the individual controlers
-        settings["pressures.com"] = ["com7","com8","com14"]                                            # port of the individual controlers, not same number as number of gauges
-        settings["pressures.baud"] = [9600,9600,9600]                                             # separated list for each controler
-        settings["pressures.bits"] = [8,8,8]                                                # ...same for bits and so on
+        settings["pressures.names"] = ["Mc","Pc","MBE","Fore1","BFM"]                      	        # names of the pressures to be read, most important referer
+        settings["pressures.GUIGraphnames"] = ['Mc','Pc','MBE','LL','BFM','Fore1','Fore2']              # allocation of names to the checkboxes in the Pressure display
+        settings["pressures.types"] = ["VarianBA","VarianBA","AML","AML","epiMaxUni"]                   # select type of interface to be used, VarianBA, AML_weird, epiMaxUni
+        settings["pressures.controllers"] = [0,0,1,1,2]                                                 # should refer to each individual controller available
+        settings["pressures.channels"] = [1,2,0,1,1]                                                    # gives the channel to look for in the individual controlers
+        settings["pressures.com"] = ["com7","com8","com14"]                                             # port of the individual controlers, not same number as number of gauges
+        settings["pressures.baud"] = [9600,9600,4800]                                                   # separated list for each controler
+        settings["pressures.bits"] = [8,8,8]                                                            # ...same for bits and so on
         settings["pressures.parity"] = [serial.PARITY_NONE,serial.PARITY_NONE,serial.PARITY_NONE]
         settings["pressures.timeout"] = [0.5,0.5,0.5]
         settings["pressures.stopbits"] = [1,1,1]                     
@@ -120,9 +120,12 @@ def getDefaultSettings():
 
         # ******************************************************settings section for growth control*********************************************
         settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[6]]             # Allocation of the different Controllers to the respective fields (GUI definition)
-        settings["growthcontrol.Fieldnames"] = ["Quad","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
+        settings["growthcontrol.Fieldnames"] = ["Sb2Te3","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
-
+        settings["growthcontrol.BEPreadSeparationtime"] = 1                                     # time spacing between reads
+        settings["growthcontrol.BEPstabilisationTime"] = 5                                      # waiting time after opening/closing
+        settings["growthcontrol.numreads"] = 2                                                  # number of readings for open/closed to get more precise
+        settings["growthcontrol.cycles"] = 3                                                    # number of cycles to do to acquire the BEP
         # backend definitions -> binding of pid controlers
         settings["growthcontrol.comPIDs"] = True
         settings["growthcontrol.Controlernicknames"] = ["Wine","Vodka","Rum","Cachassa","Tequilla","Whiskey","Beer"]      # refering name of the Eurotherms, has to be unique!
@@ -138,10 +141,10 @@ def getDefaultSettings():
 
         settings["growthcontrol.PressureChannels"] = ["MBE","BFM"]                                              # Used to collect pressures for chamber and monitor
 
-        settings["growthcontrol.Shutterstates"] = [["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed","openright","Bi2Te3","MnTe"]] # open and closed should always be refered to as open and closed! rest is optiona!
-        settings["growthcontrol.ShutterstateAngles"] = [[90,0,-90,-30,30],[180,0],[180,0],[180,0],[180,0],[180,0]]
+        settings["growthcontrol.Shutterstates"] = [["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"]] # open and closed should always be refered to as open and closed! rest is optiona!
+        settings["growthcontrol.ShutterstateAngles"] = [[180,0],[180,0],[180,0],[180,0],[180,0],[180,0]]
         settings["growthcontrol.GUIpolltime"] = 1                                                                # GUI refresh every t seconds
-        settings["growthcontrol.shutternames"] = ["s1","s2","s3","s4","s5","s6"]                                                     # names of the shutter assignet to the induvidual cells
+        settings["growthcontrol.shutternames"] = ["s4","s2","s3","s1","s5","s6"]                                                     # names of the shutter assignet to the induvidual cells
         
 
         return settings

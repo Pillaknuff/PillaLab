@@ -15,6 +15,7 @@ import win32event   # ...
 import os           # paths, files, similar
 import pickle       # export/import python internal data
 from datetime import datetime # used writing dates and time in a nice rendered string fashion
+import statistics
 
 
 sys.path.insert(0, "./GUI") # Quick hack to avoid incompatibilities with Page standard output for GUI's, not Gui.package and package both work!
@@ -711,48 +712,60 @@ class controllBackend:
         if not error:                                                                                                                       # if this has worked -> save new parameters!
             self.settingsout()
 
-    def measureBEP(self,controlername,shutter,numreads=5):
-        openstate = self.settings["growthcontrol.bepposition"][self.settings["growthcontrol.Controlernicknames"].index(controlername)]      # search out number of controler, then get the respective fitting value for the bep measuring position
-        basepressure = 0
-        basecounter = 0
-        for i in range(numreads):
-            p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
-            try:
-                basepressure +=  p
-                basecounter += 1                                                                                                            # location of the Pressure monitors name
-            except:
-                print("missread in p")
-        self.SetShutterState(shutter,openstate)
-        time.sleep(2)
-        openpressure = 0
-        opencounter = 0
-
-        for i in range(numreads):
-            p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
-            try:
-                openpressure +=  p
-                opencounter += 1                                                                         
-            except:
-                print("missread in p")
-        openpressure = openpressure/opencounter
-
-        self.SetShutterState(shutter,'closed')
-        time.sleep(2)
-        for i in range(numreads):
-            p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
-            try:
-                basepressure +=  p
-                basecounter += 1                                                                         
-            except:
-                print("missread in p")                                                                       
+    def measureBEP(self,controlername,shutter):
         
-        basepressure = basepressure/(basecounter)
-        bep = openpressure - basepressure
+        openstate = self.settings["growthcontrol.bepposition"][self.settings["growthcontrol.Controlernicknames"].index(controlername)]      # search out number of controler, then get the respective fitting value for the bep measuring position
+        
+        bep_array = []
+        
+        for j in range(self.settings["growthcontrol.cycles"]):
+            basepressure = 0
+            basecounter = 0
+            for i in range(self.settings["growthcontrol.numreads"]):
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                try:
+                    basepressure +=  p
+                    basecounter += 1                                                                                                            # location of the Pressure monitors name
+                except Exception as e:
+                    print("missread in p" + str(e))
+                time.sleep(self.settings["growthcontrol.BEPreadSeparationtime"])
+            self.SetShutterState(shutter,openstate)
+            time.sleep(self.settings["growthcontrol.BEPstabilisationTime"])
+            openpressure = 0
+            opencounter = 0
 
-        #print('bep measured to be ' + str(bep) )
+            for i in range(self.settings["growthcontrol.numreads"]):
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                try:
+                    openpressure +=  p
+                    opencounter += 1                                                                         
+                except Exception as e:
+                    print("missread in p" + str(e))
+                time.sleep(self.settings["growthcontrol.BEPreadSeparationtime"])
+            openpressure = openpressure/opencounter
 
-        self.LogAction('bep',controlername,bep)
-        return bep
+            self.SetShutterState(shutter,'closed')
+            time.sleep(self.settings["growthcontrol.BEPstabilisationTime"])
+            for i in range(self.settings["growthcontrol.numreads"]):
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                try:
+                    basepressure +=  p
+                    basecounter += 1                                                                         
+                except Exception as e:
+                    print("missread in p" + str(e))                                                                     
+            
+            basepressure = basepressure/(basecounter)
+            bep = openpressure - basepressure
+            bep_array.append(bep)
+
+        bep_avg = statistics.mean(bep_array)
+        bep_stdev = statistics.stdev(bep_array)
+        
+
+
+
+        self.LogAction('bep',controlername,[bep_avg,bep_stdev])
+        return bep_avg
         
     # Shutter control***************************************************
     '''

@@ -207,23 +207,23 @@ def getAutotuneVal(controler):                                                  
     
     return state
 
-def measureBEP(controler):
-    BepThread = threading.Thread(target=performBEPmeasurementAndUpdate,args=[controler])
+def measureBEP(fieldnumber):
+    BepThread = threading.Thread(target=performBEPmeasurementAndUpdate,args=[fieldnumber])
     BepThread.start()
 
-def performBEPmeasurementAndUpdate(controler):
+def performBEPmeasurementAndUpdate(fieldnumber):
     print("PerformingBEPMesurement")
     error = False
     try:
-        channel = Tselectors[controler].get()
-        shutter = theController.settings["growthcontrol.Shutterallocation"][controler]
+        channel = Tselectors[fieldnumber].get()
+        shutter = theController.settings["growthcontrol.Shutterallocation"][fieldnumber]
     except Exception as e:
         print("Error in BEP measurement: " + str(e))
         error = True
     if not error:
         newBEP = theController.measureBEP(channel,shutter)
         strBEP = '{:0.2e}'.format(newBEP)
-        BepDisplays[controler].configure(text=strBEP)
+        BepDisplays[fieldnumber].configure(text=strBEP)
 
 def openShutter(field):
     print("opening shutter")

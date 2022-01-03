@@ -39,14 +39,14 @@ class aSerial:
             self.serial.timeout = self.settings['rs232.timeout']
             self.serial.stopbits = self.settings['rs232.stopbits']
             self.serial.parity = self.settings['rs232.parity']
-        except:
+        except Exception as e:
             self.serial.baudrate =9600
             self.serial.port = 'com10'
             self.serial.bytesize = 8
             self.serial.timeout = 200
             self.serial.stopbits = 1
             self.serial.parity = serial.PARITY_NONE
-            print("calling rs232 settings from default")
+            print("error, calling rs232 settings from default" + str(e))
             #self.serial.parity = self.settings['rs232.parity']
 
     
@@ -101,16 +101,16 @@ class aSerial:
         #Place to further process this string!
         if channel == 0:
             try:
-                p1 = ans.split(",")[0].split("@")[3]
+                p1 = ans.split("GI1A@")[1].split(",")[0]
             except Exception as e:
-                print("Error in AML readings conversion p1")
+                print("Error in AML readings conversion p1" + str(e))
                 p1 = 'nan'
             return p1
         elif channel == 1:
             try:
-                p2 = ans.split(",")[1].split("@")[1]
+                p2 = ans.split("GP2A@")[1].split(",")[0]
             except Exception as e:
-                print("Error in AML readings conversion p2")
+                print("Error in AML readings conversion p2" + str(e))
                 p2 = 'nan'
             return p2
         else:
@@ -154,6 +154,27 @@ class aSerial:
         else:
             print(ans)
             return "nan"
+
+    def ReadEpiMaxGauge(self,channel):                                                      # using own read write procedure, as some smart programmer has decided not to append carriage returns to the messages of the controler. In this case, the readline used above does not work and we have to search for the ! character as EOL
+        #self.serial.open()
+        #print("attempting to write " + Command)
+        Command = ">" + str(channel).zfill(2) + "?Iv!"
+        Command = Command.encode()
+        try:
+            self.serial.write(Command)
+            answerstring = ""
+            while True:
+                answer = self.serial.read()
+                answer = answer.decode()
+                answerstring += answer
+                if answer == "!":
+                    break
+        except Exception as e:
+            print("error writing to Epi Max" + str(e))
+            return 'nan'
+        p = answerstring.split("Iv")[1].rstrip("!")
+        return p
+
 
     """
     A short note on using the EpiMax interfaces

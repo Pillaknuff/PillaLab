@@ -26,15 +26,15 @@ class IonGaugeTalker:
     def createConnection(self,settingsRs,crtype):                                                       # Function sorting out what driver to use for the connection
         connector = ""                                                                                  # empty standard object
         error = False
-        if crtype in  ["VarianBA", "AML_weird", "AML"]:                                                 # simple rs232 question-answer ascii communication
+        if crtype in  ["VarianBA", "AML_weird", "AML","epiMaxUni"]:                                                 # simple rs232 question-answer ascii communication
             try:
                 connector = RSInterface.aSerial(settingsRs)
             except Exception as e:
                 print("Error connecting to gauge with settings " + str(settingsRs) + " Error: " + str(e))
                 error = True
-        elif crtype in ["epiMaxUni"]:                                                                   # epimax Modbus communication
+        elif crtype in ["epiMaxUni_modbus"]:                                                                   # epimax Modbus communication
             try:
-                import drivers.epiMaxDriver as epiMaxDriver
+                import drivers.epiMaxDriver_complicated as epiMaxDriver
                 connector = epiMaxDriver.PVCi(settingsRs["rs232.com"])
             except Exception as e:
                 print("Error connecting to epimax gauge with settings " + str(settingsRs) + " Error: " + str(e))
@@ -79,14 +79,8 @@ class IonGaugeTalker:
                 p = interf.ReadWeirdAMLGaugeSingle(channel)
             elif tp == "AML":
                 p = interf.ReadAMLGaugeSingle(channel)
-            # elif tp == "epiMaxUni":         # read special epi-max driver
-            #     try:
-            #         if channel == 1:
-            #             p = interf.ion_gauge_1_pressure
-            #         elif channel == 2:
-            #             p = interf.slot_a_value_1
-            #     except:
-            #         p = "0"
+            elif tp == "epiMaxUni":
+                p = interf.ReadEpiMaxGauge(channel)
             else:                           # include aml here later
                 p = "0"
 
@@ -101,7 +95,7 @@ class IonGaugeTalker:
                     p = p.replace('>','')
                     p = float(p)
                 except Exception as e:
-                    print("error converting " + str(p) + " to float")
+                    print("error converting " + str(p) + " to float from " + str(name))
                     print(e)
                     p = float(0)
                     error = True
