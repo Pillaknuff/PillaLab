@@ -1,7 +1,9 @@
 import numpy as np
+from numpy.core.fromnumeric import mean
 import serial
 import time
 import threading
+
 
 class aSerial:
     def __init__(self,settings):
@@ -11,6 +13,7 @@ class aSerial:
         self.connect()
         print(settings)
         self.storage={}
+        self.busy = False
 
 
     def connect(self):
@@ -155,24 +158,51 @@ class aSerial:
             print(ans)
             return "nan"
 
-    def ReadEpiMaxGauge(self,channel):                                                      # using own read write procedure, as some smart programmer has decided not to append carriage returns to the messages of the controler. In this case, the readline used above does not work and we have to search for the ! character as EOL
+    def ReadEpiMaxGauge(self,channel, measureanyway = False):                                                      # using own read write procedure, as some smart programmer has decided not to append carriage returns to the messages of the controler. In this case, the readline used above does not work and we have to search for the ! character as EOL
         #self.serial.open()
         #print("attempting to write " + Command)
+        timeout = 2
+        recursive = False
+        i = 0
+
+        if not measureanyway:
+            while self.busy:
+                time.sleep(0.2)
+                i+=1
+                if i > 100:
+                    break
+                print("BFM busy, wait")
+        self.busy = True
+
         Command = ">" + str(channel).zfill(2) + "?Iv!"
         Command = Command.encode()
         try:
+            self.serial.flushInput()
             self.serial.write(Command)
             answerstring = ""
+
+            t = time.time()
+
             while True:
                 answer = self.serial.read()
                 answer = answer.decode()
                 answerstring += answer
                 if answer == "!":
                     break
+                elif ((time.time() - t) > timeout):
+                    print("missread on EpiMax")
+                    p = self.ReadEpiMaxGauge(channel, measureanyway=True)
+                    recursive = True
+                    break
+            print(answerstring)
         except Exception as e:
             print("error writing to Epi Max" + str(e))
             return 'nan'
-        p = answerstring.split("Iv")[1].rstrip("!")
+
+        if not recursive:
+            p = answerstring.split("Iv")[1].rstrip("!")
+
+        self.busy = False
         return p
 
 

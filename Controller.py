@@ -557,6 +557,7 @@ class controllBackend:
             try:
                 pressure,error = self.__GetSinglePressure(name,logtag)
             except Exception as e:
+                pressure = float('nan')
                 error = True
                 print ("error in GetSinglePressure Reread: " + str(e))
         
@@ -722,7 +723,7 @@ class controllBackend:
             basepressure = 0
             basecounter = 0
             for i in range(self.settings["growthcontrol.numreads"]):
-                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1], triggerReRead=True)
                 try:
                     basepressure +=  p
                     basecounter += 1                                                                                                            # location of the Pressure monitors name
@@ -735,7 +736,7 @@ class controllBackend:
             opencounter = 0
 
             for i in range(self.settings["growthcontrol.numreads"]):
-                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1], triggerReRead=True)
                 try:
                     openpressure +=  p
                     opencounter += 1                                                                         
@@ -747,7 +748,7 @@ class controllBackend:
             self.SetShutterState(shutter,'closed')
             time.sleep(self.settings["growthcontrol.BEPstabilisationTime"])
             for i in range(self.settings["growthcontrol.numreads"]):
-                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1])
+                p,err = self.GetSinglePressure(self.settings["growthcontrol.PressureChannels"][1], triggerReRead=True)
                 try:
                     basepressure +=  p
                     basecounter += 1                                                                         
@@ -757,9 +758,11 @@ class controllBackend:
             basepressure = basepressure/(basecounter)
             bep = openpressure - basepressure
             bep_array.append(bep)
-
+        
         bep_avg = statistics.mean(bep_array)
         bep_stdev = statistics.stdev(bep_array)
+
+        print("BEP measured: " + str(bep_array) + " mean: " + str(bep_avg) + " stdev: " + str(bep_stdev))
         
 
 

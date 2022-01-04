@@ -123,7 +123,7 @@ def getDefaultSettings():
         settings["growthcontrol.Fieldnames"] = ["Sb2Te3","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
         settings["growthcontrol.BEPreadSeparationtime"] = 1                                     # time spacing between reads
-        settings["growthcontrol.BEPstabilisationTime"] = 5                                      # waiting time after opening/closing
+        settings["growthcontrol.BEPstabilisationTime"] = 8                                      # waiting time after opening/closing
         settings["growthcontrol.numreads"] = 2                                                  # number of readings for open/closed to get more precise
         settings["growthcontrol.cycles"] = 3                                                    # number of cycles to do to acquire the BEP
         # backend definitions -> binding of pid controlers
