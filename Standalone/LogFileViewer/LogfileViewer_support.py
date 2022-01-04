@@ -40,6 +40,14 @@ def open_Loader(*args):
 if __name__ == '__main__':
     LogfileViewer.start_up()
 
-
+'''
+for key in hf.keys():
+    print(key)
+    print(hf[key])
+    print(hf[key].keys())
+    for akey in hf[key].keys():
+        print(hf[key][akey].value)
+        
+'''
 
 

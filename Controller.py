@@ -753,7 +753,9 @@ class controllBackend:
                     basepressure +=  p
                     basecounter += 1                                                                         
                 except Exception as e:
-                    print("missread in p" + str(e))                                                                     
+                    print("missread in p" + str(e))
+                time.sleep(self.settings["growthcontrol.BEPreadSeparationtime"])                                                                   
+            time.sleep(self.settings["growthcontrol.BEPreadSeparationtime"]) 
             
             basepressure = basepressure/(basecounter)
             bep = openpressure - basepressure
