@@ -9,6 +9,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.constants import *
+import h5py
 
 import LogfileViewer
 
@@ -24,16 +25,17 @@ def main(*args):
     root.mainloop()
 
 def DisplaySelected(*args):
-    print('LogfileViewer_support.DisplaySelected')
-    for arg in args:
-        print ('another arg:', arg)
-    sys.stdout.flush()
+    print("displaying")
+
 
 def open_Loader(*args):
-    print('LogfileViewer_support.open_Loader')
-    for arg in args:
-        print ('another arg:', arg)
-    sys.stdout.flush()
+    global hf
+    try:
+        from tkinter import filedialog
+    except:
+        import tkFileDialog as filedialog
+    file_path = filedialog.askopenfilename()
+    hf = h5py.File(file_path, 'r')
 
 if __name__ == '__main__':
     LogfileViewer.start_up()
