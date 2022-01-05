@@ -112,7 +112,7 @@ def ChangeGroup(*args):
         groupdata = {}
 
         for key in hf[selectedgroup].keys():
-            if not "timestamp" in key or "Eventlog" in key:
+            if (not (("timestamp" in key) or ( "EventLog" in key))):
                 groupkeys.append(key)
         
         print(groupkeys)
