@@ -194,7 +194,7 @@ class aSerial:
                     p = self.ReadEpiMaxGauge(channel, measureanyway=True)
                     recursive = True
                     break
-            print(answerstring)
+            #print(answerstring)
         except Exception as e:
             print("error writing to Epi Max" + str(e))
             return 'nan'
