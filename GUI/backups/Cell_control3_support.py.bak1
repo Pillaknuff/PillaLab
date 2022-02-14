@@ -7,7 +7,6 @@
 #    Aug 23, 2020 12:32:52 AM CEST  platform: Windows NT
 #    Oct 19, 2020 03:40:46 PM CEST  platform: Windows NT
 #    Dec 06, 2020 01:07:28 PM CET  platform: Windows NT
-#    Feb 14, 2022 05:59:05 PM CET  platform: Windows NT
 
 import sys
 import threading
@@ -79,21 +78,21 @@ def startMainGUI(controlBackend): # main caller
     import Cell_control3
     global theController, w ,top_level ,root, Tselectors, Tsettinpoints, Tramps, Shutterselectors, Cellnames, Tdisplays, BepDisplays,Autotuneboxes,Eventlist, substratenentrynumber, substratecontrolernickname
     
-    substratenentrynumber = 7 # used to refer to substrate as an special entry, by default the last one
+    substratenentrynumber = 6 # used to refer to substrate as an special entry, by default the last one
     theController= controlBackend #tell everybody about statemashine
     substratecontrolernickname = theController.settings["growthcontrol.Controlernicknames"][len(theController.settings["growthcontrol.Controlernicknames"])-1]
     top, w = Cell_control3.create_Toplevel1(theController.root)  # create initial window process
 
     # make global lists of widgets *********
-    Tselectors = [w.Tselector1,w.Tselector2,w.Tselector3,w.Tselector4,w.Tselector5,w.Tselector6,w.Tselector7]                                                # select cell length used to label cells, substrate is unique
-    Tsettinpoints = [w.Tset1,w.Tset2,w.Tset3,w.Tset4,w.Tset5,w.Tset6,w.Tset7,w.Tset_S]                                                                  # setpoints inputs, also contains substrate
-    Tramps = [w.rset1,w.rset2,w.rset3,w.rset4,w.rset5,w.rset6,w.rset7,w.rset_S]                                                                         # ramprate inputs, also substrate
+    Tselectors = [w.Tselector1,w.Tselector2,w.Tselector3,w.Tselector4,w.Tselector5,w.Tselector6]                                                # select cell length used to label cells, substrate is unique
+    Tsettinpoints = [w.Tset1,w.Tset2,w.Tset3,w.Tset4,w.Tset5,w.Tset6,w.Tset_S]                                                                  # setpoints inputs, also contains substrate
+    Tramps = [w.rset1,w.rset2,w.rset3,w.rset4,w.rset5,w.rset6,w.rset_S]                                                                         # ramprate inputs, also substrate
     Shutterselectors = [w.Shutterselector1,w.Shutterselector2,w.Shutterselector3,w.Shutterselector1_8,w.Shutterselector5,w.Shutterselector6]    # fields selecting the state the shutter should be set into
-    Tdisplays = [w.LabelTcell1,w.LabelTcell2,w.LabelTcell3,w.LabelTcell4,w.LabelTcell5,w.LabelTcell6,w.LabelTcell7,w.LabelT_S]                                # Temperature displays for the individual cells
-    Cellnames = [w.Headerlabel1,w.Headerlabel2,w.Headerlabel3,w.Headerlabel4,w.Headerlabel5,w.Headerlabel6,w.Headerlabel7]
+    Tdisplays = [w.LabelTcell1,w.LabelTcell2,w.LabelTcell3,w.LabelTcell4,w.LabelTcell5,w.LabelTcell6,w.LabelT_S]                                # Temperature displays for the individual cells
+    Cellnames = [w.Headerlabel1,w.Headerlabel2,w.Headerlabel3,w.Headerlabel4,w.Headerlabel5,w.Headerlabel6]
     #BepDisplays = [w.LabelBEP,w.LabelBEP_8,w.LabelBEP_9,w.LabelBEP_10,w.LabelBEP_11,w.LabelBEP_12]
     BepDisplays = [w.BEPdisp1,w.BEPdisp2,w.BEPdisp3,w.BEPdisp4,w.BEPdisp5,w.BEPdisp6]                                                           # Displays to show the measured BEP results
-    Autotuneboxes = [w.Autotunecheck1,w.Autotunecheck2,w.Autotunecheck3,w.Autotunecheck4,w.Autotunecheck5,w.Autotunecheck6,w.Autotunecheck7,w.AutotunecheckS]    # Autotune checkboxes
+    Autotuneboxes = [w.Autotunecheck1,w.Autotunecheck2,w.Autotunecheck3,w.Autotunecheck4,w.Autotunecheck5,w.Autotunecheck6,w.AutotunecheckS]    # Autotune checkboxes
 
     for i in range(len(Tselectors)):                    # now fill all fields with meaning
         try:
@@ -126,7 +125,7 @@ def startMainGUI(controlBackend): # main caller
 
 def GuiRefresher():                                                                     # continuous update of all readings of the GUI
     while celctrrunning:
-        for i in range(8):
+        for i in range(7):
             # Update Temperature readings***********************
             if not i == substratenentrynumber:
                 channel = Tselectors[i].get()
@@ -171,6 +170,7 @@ def setTemperature(controler):
             print("channel not supported!")
     except Exception as e:
         print("error setting Temperature: " + str(e))
+
 
 def rampTemperature(controler):
     if not controler == substratenentrynumber:
@@ -399,9 +399,6 @@ def setT5():
 def setT6():
     setTemperature(5)
 
-def setT7(*args):
-    setTemperature(6)
-
 def setTS():
     setTemperature(substratenentrynumber)
 
@@ -422,9 +419,6 @@ def rampT5():
 
 def rampT6():
     rampTemperature(5)
-
-def rampT7(*args):
-    rampTemperature(6)
 
 def rampTS():
     rampTemperature(substratenentrynumber)
@@ -485,10 +479,6 @@ def closeS6():
 
 def closeTS():
     moveSubstrateShutter("closed")
-
-
-
-
 
 if __name__ == '__main__':
     import Cell_control3
