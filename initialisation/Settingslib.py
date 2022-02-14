@@ -119,7 +119,7 @@ def getDefaultSettings():
         # settings["PyTango.dummymode"] = True
 
         # ******************************************************settings section for growth control*********************************************
-        settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[6]]             # Allocation of the different Controllers to the respective fields (GUI definition)
+        settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[7]]             # Allocation of the different Controllers to the respective fields (GUI definition)
         settings["growthcontrol.Fieldnames"] = ["Sb2Te3","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
         settings["growthcontrol.BEPreadSeparationtime"] = 2                                     # time spacing between reads
@@ -128,21 +128,21 @@ def getDefaultSettings():
         settings["growthcontrol.cycles"] = 3                                                    # number of cycles to do to acquire the BEP
         # backend definitions -> binding of pid controlers
         settings["growthcontrol.comPIDs"] = True
-        settings["growthcontrol.Controlernicknames"] = ["Wine","Vodka","Rum","Cachassa","Tequilla","Whiskey","Beer"]      # refering name of the Eurotherms, has to be unique!
-        settings["growthcontrol.standardramprates"] = [10,10,10,10,10,10,10]                       #
+        settings["growthcontrol.Controlernicknames"] = ["Wine","Vodka","Rum","Cachassa","Tequilla","Whiskey","Beer","Cointreau"]      # refering name of the Eurotherms, has to be unique!
+        settings["growthcontrol.standardramprates"] = [10,10,10,10,10,10,10,10]                       #
         settings["growthcontrol.bepposition"] = ["open","open","open","open","open","open"]                          # for each Cell gives the setting of the shutter, which should be used for bep reading
-        settings["growthcontrol.com"] = ['com10','com11','com4','com13','com5','com9','com6']                           # com adresses of the individual eurotherms
-        settings["growthcontrol.slaveadress"] = [1,1,1,1,1,1,1]                               # slaveadresses, standard is 1
-        settings["growthcontrol.baud"] = [9600,9600,9600,9600,9600,9600,9600]                                # baud rate for eurotherms, standard is 9600
-        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408']          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
-        settings["growthcontrol.useexternalPIDvals"] = [False,False,False,False,False,False,False]                   # if set to True, uses own PID settings and pushes them to device
-        settings["growthcontrol.PIDswitchingpoints"] = [[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800]]                            # Temperature points for each controler, for which the PID range will be changed (see values below)
-        settings["growthcontrol.externalPIDs"] = [[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)]]          # Software controled PID sets in  controler -> [(PID up to T1),(PID up to T2),...]
+        settings["growthcontrol.com"] = ['com10','com11','com4','com13','com5','com9','com6','com15']                           # com adresses of the individual eurotherms
+        settings["growthcontrol.slaveadress"] = [1,1,1,1,1,1,1,1]                               # slaveadresses, standard is 1
+        settings["growthcontrol.baud"] = [9600,9600,9600,9600,9600,9600,9600,19200]                                # baud rate for eurotherms, standard is 9600
+        settings["growthcontrol.type"] = ['eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408','eurotherm2408']          # refers to eurotherm type, differs in what driver file is assigned to the eurotherm, so far only eurotherm2408 is implemented
+        settings["growthcontrol.useexternalPIDvals"] = [False,False,False,False,False,False,False,False]                   # if set to True, uses own PID settings and pushes them to device
+        settings["growthcontrol.PIDswitchingpoints"] = [[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800],[200,400,800]]                            # Temperature points for each controler, for which the PID range will be changed (see values below)
+        settings["growthcontrol.externalPIDs"] = [[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)],[(1,1,1),(1,1,1),(1,1,1)]]          # Software controled PID sets in  controler -> [(PID up to T1),(PID up to T2),...]
 
         settings["growthcontrol.PressureChannels"] = ["MBE","BFM"]                                              # Used to collect pressures for chamber and monitor
 
-        settings["growthcontrol.Shutterstates"] = [["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"]] # open and closed should always be refered to as open and closed! rest is optiona!
-        settings["growthcontrol.ShutterstateAngles"] = [[180,0],[180,0],[180,0],[180,0],[180,0],[180,0]]
+        settings["growthcontrol.Shutterstates"] = [["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"],["open","closed"]] # open and closed should always be refered to as open and closed! rest is optiona!
+        settings["growthcontrol.ShutterstateAngles"] = [[180,0],[180,0],[180,0],[180,0],[180,0],[180,0],[180,0]]
         settings["growthcontrol.GUIpolltime"] = 1                                                                # GUI refresh every t seconds
         settings["growthcontrol.shutternames"] = ["s4","s2","s3","s1","s5","s6"]                                                     # names of the shutter assignet to the induvidual cells
         

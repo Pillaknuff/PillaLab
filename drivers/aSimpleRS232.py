@@ -106,14 +106,17 @@ class aSerial:
             try:
                 p1 = ans.split("GI1A@")[1].split(",")[0]
             except Exception as e:
-                print("Error in AML readings conversion p1" + str(e))
-                p1 = 'nan'
+                try:
+                    p1 = ans.split("@GI1AB")[1].split(",")[0]                               # this is the case for one broken filament or some other weird error case(?)
+                except Exception as e:
+                    print("Error in AML readings conversion p1" + str(e) + str(ans))
+                    p1 = 'nan'
             return p1
         elif channel == 1:
             try:
                 p2 = ans.split("GP2A@")[1].split(",")[0]
             except Exception as e:
-                print("Error in AML readings conversion p2" + str(e))
+                print("Error in AML readings conversion p2" + str(e) + str(ans))
                 p2 = 'nan'
             return p2
         else:
