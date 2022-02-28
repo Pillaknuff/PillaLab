@@ -12,7 +12,7 @@ class EurothermWrapper:
 
         for i in range(len(self.settings["growthcontrol.Controlernicknames"])):
 
-            if "PIDs.baud" in self.settings.keys():
+            if "growthcontrol.baud" in self.settings.keys():
                 baud = self.settings["growthcontrol.baud"][i]
             else:
                 baud = 9600
@@ -39,7 +39,7 @@ class EurothermWrapper:
                     error = False
                     myeurotherm = eurotherm.eurotherm2408(port,slaveAddress=slavead,baudrate=baud)
                 except Exception as e:
-                    print("error, while initializing eurotherm at port " + str(port) + ": " + str(e))
+                    print("error, while initializing eurotherm at port " + str(port) + " with baud " + str(baud) + " and slave adress " + str(slavead) + ": " + str(e))
                     error = True
             else:
                 error = True
@@ -109,7 +109,7 @@ class EurothermWrapper:
             [controller,settings] = self.interfaces[PIDname]
             readtemp = controller.temperature
         except Exception as e:
-            print(e)
+            print("Error in Eurotherm Read " + str(e))
             readtemp = 0
         return readtemp
 

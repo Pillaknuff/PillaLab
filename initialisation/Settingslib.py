@@ -119,7 +119,7 @@ def getDefaultSettings():
         # settings["PyTango.dummymode"] = True
 
         # ******************************************************settings section for growth control*********************************************
-        settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[5],[7]]             # Allocation of the different Controllers to the respective fields (GUI definition)
+        settings["growthcontrol.Controlerallocation"] = [[0],[1],[2],[3],[4],[7],[6]]             # Allocation of the different Controllers to the respective fields (GUI definition)
         settings["growthcontrol.Fieldnames"] = ["Sb2Te3","Tm","Te","BaF2", "MnTe", "Bi2Te3"]                # Naming of the GUI fields
         settings["growthcontrol.Shutterallocation"] = [0,1,2,3,4,5,6]                       # Allocate the shutters to the respective fields
         settings["growthcontrol.BEPreadSeparationtime"] = 2                                     # time spacing between reads
