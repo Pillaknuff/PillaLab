@@ -10,7 +10,17 @@ class Loggingmachine:
         self.filename = self.settings["logging.filename"]
         self.path = self.settings["logging.folder"]
         self.groupnamemask = self.settings["logging.groupname"]
-        self.hf = h5py.File(self.path+self.filename, 'a')
+        try:
+            self.hf = h5py.File(self.path+self.filename, 'a')
+        except Exception as e:
+            print("Error in Loggingmaching: " + str(e))
+            try:
+                from tkinter import filedialog
+            except:
+                import tkFileDialog as filedialog
+            self.path = filedialog.askdirectory()
+            self.hf = h5py.File(self.path+self.filename, 'a')
+
 
         i=0
         while True: # create group in loop
@@ -47,10 +57,15 @@ class UniversalLoggingTool:
             
             if not user == "":                                      # user specific directories
                 user = user.strip()
-                self.path=self.path + user + "/"
+                self.path=self.path +"/"+ user + "/"
             
             if not path.exists(self.path):
-                os.mkdir(self.path)
+                try:
+                    from tkinter import filedialog
+                except:
+                    import tkFileDialog as filedialog
+                self.path = filedialog.askopenfilename()
+
             self.path = self.path + filename + ".h5"                # full file path
 
             self.groupnamemask = groupmask
