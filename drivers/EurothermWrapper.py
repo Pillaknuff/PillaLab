@@ -1,5 +1,6 @@
 import random
 import drivers.eurotherm as eurotherm
+import drivers.eurotherm3500 as eurotherm35
 import numpy as np
 import threading
 import time
@@ -40,6 +41,13 @@ class EurothermWrapper:
                     myeurotherm = eurotherm.eurotherm2408(port,slaveAddress=slavead,baudrate=baud)
                 except Exception as e:
                     print("error, while initializing eurotherm at port " + str(port) + " with baud " + str(baud) + " and slave adress " + str(slavead) + ": " + str(e))
+                    error = True
+            elif PIDtype == "eurotherm3508":
+                try:
+                    error = False
+                    myeurotherm = eurotherm35.Eurotherm3500(port,slaveAddress=slavead)
+                except Exception as e:
+                    print("error, while initializing eurotherm3500 at port " + str(port) + " and slave adress " + str(slavead) + ": " + str(e))
                     error = True
             else:
                 error = True
@@ -108,6 +116,7 @@ class EurothermWrapper:
         try:
             [controller,settings] = self.interfaces[PIDname]
             readtemp = controller.temperature
+            #print("reading at " + str(PIDname) + " : " + str(readtemp))
         except Exception as e:
             print("Error in Eurotherm Read " + str(e))
             readtemp = 0

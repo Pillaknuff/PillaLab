@@ -18,6 +18,7 @@ import math
 
 class eurotherm2408(object):
     def __init__(self, serialPort, slaveAddress=1, baudrate=9600 ):
+        print("Initializing Eurotherm controller in mode 2480 on port " + str(serialPort) + " with baudrate " + str(baudrate))
         
         # Keep this first in the class
         

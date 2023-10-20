@@ -66,6 +66,10 @@ def set_Tk_var():
     Sselect6 = tk.StringVar()
     global Tselect6
     Tselect6 = tk.StringVar()
+    global Sselect7
+    Sselect6 = tk.StringVar()
+    global Tselect7
+    Tselect6 = tk.StringVar()
     global combobox
     combobox = tk.StringVar()
 
@@ -104,8 +108,9 @@ def startMainGUI(controlBackend): # main caller
             Tselectors[i].configure(values=namelist)
             Tselectors[i].current(0)
             Cellnames[i].config(text=theController.settings["growthcontrol.Fieldnames"][i])
-            Shutterselectors[i].configure(values=theController.settings["growthcontrol.Shutterstates"][theController.settings["growthcontrol.Shutterallocation"][i]])
-            Shutterselectors[i].current(0)
+            if i<6 :
+                Shutterselectors[i].configure(values=theController.settings["growthcontrol.Shutterstates"][theController.settings["growthcontrol.Shutterallocation"][i]])
+                Shutterselectors[i].current(0)
 
         except Exception as e:
             print("error while filling fields in Cell Control, maybe ignorable: " + str(e))

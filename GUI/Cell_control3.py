@@ -83,6 +83,8 @@ class Toplevel1:
         self.Sselect6 = tk.StringVar()
         self.Tselect6 = tk.StringVar()
         self.AtuneVar6 = tk.StringVar()
+        self.Tselect7 = tk.StringVar()
+        self.AtuneVar7 = tk.StringVar()
         self.AtuneVarS = tk.StringVar()
         self.che49 = tk.IntVar()
 
@@ -2647,7 +2649,7 @@ class Toplevel1:
         self.Tselector7 = ttk.Combobox(self.Controlframe1_10_1)
         self.Tselector7.place(relx=0.138, rely=0.322, relheight=0.075
                 , relwidth=0.567)
-        self.Tselector7.configure(textvariable=self.Tselect5)
+        self.Tselector7.configure(textvariable=self.Tselect7)
         self.Tselector7.configure(takefocus="")
 
         self.Button1_9_4 = tk.Button(self.Controlframe1_10_1)
@@ -2776,7 +2778,7 @@ class Toplevel1:
         self.Autotunecheck7.configure(highlightcolor="black")
         self.Autotunecheck7.configure(justify='left')
         self.Autotunecheck7.configure(text='''Atune''')
-        self.Autotunecheck7.configure(textvariable=self.AtuneVar5)
+        self.Autotunecheck7.configure(textvariable=self.AtuneVar7)
         self.Autotunecheck7.configure(variable=self.che49)
 
 # The following code is added to facilitate the Scrolled widgets you specified.
