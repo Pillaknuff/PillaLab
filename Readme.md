@@ -1,4 +1,5 @@
-Pillalab - Python version
+# Pillalab - Python version
+
 -> a comprehensive adaptable multi-threading package for lab control purposes
 -> Manipulator Control, Pressure reading, automated mapping, network communication, Growth control, BEP measurements
 -> developed with focus on UHV, MBE and ARPES processes
@@ -8,6 +9,11 @@ Author: Philipp Kagerer
 mailto: Philipp.Kagerer@physik.uni-wuerzburg.de
 privat: Pt.kag@gmx.de
 
+
+## Version History
+v 3.1 ***********************
+minor bux fixes, which came up during operation
+Import function for custom programs is implemented now
 
 v 3   ***********************
 Pillalab is now uploaded to GitHub (private repo), minor changes will not result in incremented versions any more
@@ -56,7 +62,7 @@ Usage with Varian working properly
 
 
 
-Style conventions for GUI
+## Style conventions for GUI
 colours:
 #5f5f5f = grey
 #eb0214 = red
@@ -64,20 +70,20 @@ colours:
 #Standard font: Comic Sans MS, 18pt
 #buttons, Segoe UI, 14pt
 
-Dependencies:
+## Dependencies:
 - Standards see below
 - PyTrinamic, if Driver for Trinamic steppers are supposed to be used
 - Tkinter
 - tested with python 3.7, 3.8
 - not compatible with python 2
 - tested on windows 10
-- GUI's created with WinPage
+- GUI's created with WinPage https://page.sourceforge.net/
 
-Communication Channels used:
+## Communication Channels used:
 - RS-232 -> used for most device communication applications
 - Ethernet -> used for SES communication, maybe later for status polling, ...
 
-A short guide to the program structure:
+## A short guide to the program structure:
 - Main Process file: Controller.py -> start main process, crate main GUI window
 - General structure of the Code:
     - GUI Applications <-> Controller <-> backend, drivers, network, logging, ...
@@ -91,3 +97,5 @@ A short guide to the program structure:
 
 
 Keep in mind, not everything is finished (yet)
+
+For a more profound documentation, see documentation folder and the manual
